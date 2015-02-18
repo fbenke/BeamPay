@@ -1,0 +1,12 @@
+static
+htmlcov
+
+.env
+.idea
+.coverage
+
+*.pyc
+*.crt
+*.key
+*.dump
+*.sql
