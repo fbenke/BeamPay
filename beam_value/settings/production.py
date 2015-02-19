@@ -81,15 +81,15 @@ ENV_SITE_MAPPING = {
     },
     ENV_DEV: {
         SITE_API: 'api-dev.beamremit.com',
-        SITE_USER: 'dev.beamremit.com',
+        SITE_USER: 'beamvalue-dev.herokuapp.com',
     },
     ENV_VIP: {
         SITE_API: 'api-vip.beamremit.com',
-        SITE_USER: 'vip.beamremit.com',
+        SITE_USER: 'beamvalue-vip.herokuapp.com',
     },
     ENV_PROD: {
         SITE_API: 'api.beamremit.com',
-        SITE_USER: 'beamremit.com',
+        SITE_USER: 'beamvalue.herokuapp.com',
     }
 }
 
@@ -253,7 +253,6 @@ COUNTRY_BLACKLIST = (
     'EC',  # Ecuador
     'ID',  # Indonesia
     'MM',  # Myanmar
-    'US'
 )
 
 TOR_BLOCKING = True
