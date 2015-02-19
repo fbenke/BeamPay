@@ -215,7 +215,7 @@ if ENV in (ENV_LOCAL,):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'beam.utils.sendgrid_django.SendGridBackend'
-    SENDGRID_USER = os.environ.get('SENDGRID_USER')
+    SENDGRID_USER = os.environ.get('SENDGRID_USERNAME')
     SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')
 
 BEAM_MAIL_ADDRESS = 'Beam <hello@beamremit.com>'
