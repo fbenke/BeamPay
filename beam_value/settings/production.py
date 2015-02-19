@@ -214,7 +214,7 @@ PASSWORD_REGEX = r'^(?=.*\d).{8,}$'
 if ENV in (ENV_LOCAL,):
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
-    EMAIL_BACKEND = 'beam.utils.sendgrid_django.SendGridBackend'
+    EMAIL_BACKEND = 'beam_value.utils.sendgrid_django.SendGridBackend'
     SENDGRID_USER = os.environ.get('SENDGRID_USERNAME')
     SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')
 
@@ -252,7 +252,8 @@ COUNTRY_BLACKLIST = (
     'DZ',  # Algeria
     'EC',  # Ecuador
     'ID',  # Indonesia
-    'MM'  # Myanmar
+    'MM',  # Myanmar
+    'US'
 )
 
 TOR_BLOCKING = True
