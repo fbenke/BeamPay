@@ -11,6 +11,7 @@ djangorestframework==3.0.5
 easy-thumbnails==2.2
 gunicorn==19.2.1
 html2text==2015.2.18
+newrelic==2.44.0.36
 psycopg2==2.6
 six==1.9.0
 static3==0.5.1
