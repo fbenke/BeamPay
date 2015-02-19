@@ -1,0 +1,22 @@
+<html>
+<body>
+{% if user.first_name %}
+  <p>Hi {{ user.first_name }},</p>
+{% else %}
+  <p>Dear {{ site.name }} User,</p> 
+{% endif %}
+<p>
+  We’ve received a request to change the email address associated with your {{ site.name }} account.
+</p>
+<p>
+  A verification link has been sent to the new address: {{ new_email }}. Click on the verification link to activate your new email address.
+</p>
+<p>
+  If you didn’t request to change your {{site.name}} email address, please contact our support team immediately at {{ support }}.
+</p>
+<p>
+  Sincerely,<br/>
+  The {{ site.name }} Team
+</p>
+</body>
+</html>

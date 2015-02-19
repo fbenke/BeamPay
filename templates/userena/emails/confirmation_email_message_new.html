@@ -1,0 +1,20 @@
+<html>
+<body>
+    {% if user.first_name %}
+    <p>Hi {{ user.first_name }},</p>
+    {% else %}
+    <p>Dear {{ site.name }} User,</p> 
+    {% endif %}
+    <p>
+        You requested to change your email address at {{ site.name }}.
+    </p>
+    <p>
+        To confirm this email as your new address, please click on the link below:<br>
+        {{ protocol }}://{{ site.domain }}/{{ email_change_link }}
+    </p>
+    <p>
+        Sincerely,<br/>
+        The {{ site.name }} Team
+    </p>
+</body>
+</html>

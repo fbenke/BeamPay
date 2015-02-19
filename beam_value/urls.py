@@ -16,6 +16,10 @@ urlpatterns = patterns(
         r'^admin/',
         include(admin.site.urls)
     ),
+    url(
+        r'^api/v1/account/',
+        include('account.urls', namespace='account')
+    ),
 )
 
 handler404 = 'beam.views.page_not_found'

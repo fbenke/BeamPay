@@ -1,0 +1,10 @@
+Hello! Thank you for signing up for Beam.
+
+To activate your account, please click on the link below:
+
+{{ activation_url }}
+
+Sincerely,
+
+The Beam Team
+

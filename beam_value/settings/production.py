@@ -149,8 +149,8 @@ else:
     CORS_ORIGIN_WHITELIST = (ENV_SITE_MAPPING[ENV][SITE_USER], )
 
 # URL contruction
-API_BASE_URL = PROTOCOL + '://' + ENV_SITE_MAPPING[ENV][SITE_API]
-USER_BASE_URL = PROTOCOL + '://' + ENV_SITE_MAPPING[ENV][SITE_USER]
+API_BASE_URL = PROTOCOL + '://' + ENV_SITE_MAPPING[ENV][SITE_API] + '/'
+USER_BASE_URL = PROTOCOL + '://' + ENV_SITE_MAPPING[ENV][SITE_USER] + '/'
 
 
 # ====================  Django Rest Framework ====================
@@ -166,13 +166,13 @@ REST_FRAMEWORK = {
     ),
     # input formats the API can handle
     'DEFAULT_PARSER_CLASSES': (
-        'beam.utils.parsers.CamelCaseJSONParser',
+        'beam_value.utils.parsers.CamelCaseJSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
     ),
     #  output formate supported by the API
     'DEFAULT_RENDERER_CLASSES': (
-        'beam.utils.renderers.CamelCaseJSONRenderer',
+        'beam_value.utils.renderers.CamelCaseJSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer'
     ),
     # throttling of requests
@@ -207,6 +207,8 @@ USERENA_REGISTER_PROFILE = False
 USERENA_HTML_EMAIL = True
 ANONYMOUS_USER_ID = -1
 
+PASSWORD_REGEX = r'^(?=.*\d).{8,}$'
+
 # ==================== Email Settings ====================
 
 if ENV in (ENV_LOCAL,):
@@ -215,6 +217,8 @@ else:
     EMAIL_BACKEND = 'beam.utils.sendgrid_django.SendGridBackend'
     SENDGRID_USER = os.environ.get('SENDGRID_USER')
     SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')
+
+BEAM_MAIL_ADDRESS = 'Beam <hello@beamremit.com>'
 
 # ==================== User Email templates ====================
 

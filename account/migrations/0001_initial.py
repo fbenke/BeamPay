@@ -22,6 +22,7 @@ class Migration(migrations.Migration):
                 ('mugshot', easy_thumbnails.fields.ThumbnailerImageField(help_text='A personal image displayed in your profile.', upload_to=userena.models.upload_to_mugshot, verbose_name='mugshot', blank=True)),
                 ('privacy', models.CharField(default=b'registered', help_text='Designates who can view your profile.', max_length=15, verbose_name='privacy', choices=[(b'open', 'Open'), (b'registered', 'Registered'), (b'closed', 'Closed')])),
                 ('country', django_countries.fields.CountryField(blank=True, help_text=b'Country', max_length=2, verbose_name=b'Country')),
+                ('accepted_privacy_policy', models.BooleanField(default=True, verbose_name=b'Privacy Policy accepted')),
                 ('user', models.OneToOneField(related_name='profile', to=settings.AUTH_USER_MODEL)),
             ],
             options={

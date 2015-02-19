@@ -6,30 +6,26 @@ from rest_framework import status
 
 from account import serializers
 
+from beam_value.utils import mails
+
 from beam_value.utils.ip_analysis import country_blocked, is_tor_node,\
     HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS
 
 
-def send_activation_email(user, request, activation_key=None):
+def send_activation_email(user, activation_key=None):
 
     if not activation_key:
         activation_key = user.userena_signup.activation_key
 
-    context = {
-        'user': user,
-        'protocol': settings.PROTOCOL,
-        'activation_days': userena_settings.USERENA_ACTIVATION_DAYS,
-        'activation_link': settings.MAIL_ACTIVATION_URL.format(activation_key),
-        'site': get_site_by_request(request)
-    }
+    activation_url = settings.USER_BASE_URL +\
+        settings.MAIL_ACTIVATION_URL.format(activation_key)
 
     mails.send_mail(
         subject_template_name=settings.MAIL_ACTIVATION_SUBJECT,
         email_template_name=settings.MAIL_ACTIVATION_TEXT,
         html_email_template_name=settings.MAIL_ACTIVATION_HTML,
         to_email=user.email,
-        from_email=settings.BEAM_MAIL_ADDRESS,
-        context=context
+        context={'activation_url': activation_url}
     )
 
 
@@ -50,10 +46,8 @@ class Signup(APIView):
             user = serializer.save()
 
             if user:
-                # store site the user signed up at
-                user.profile.save()
 
-                send_activation_email(user, request)
+                send_activation_email(user)
 
                 return Response(status=status.HTTP_201_CREATED)
 

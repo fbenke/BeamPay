@@ -20,3 +20,8 @@ class BeamProfile(UserenaBaseProfile):
         blank=True,
         help_text='Country'
     )
+
+    accepted_privacy_policy = models.BooleanField(
+        'Privacy Policy accepted',
+        default=True
+    )
