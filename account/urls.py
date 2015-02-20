@@ -25,6 +25,16 @@ urlpatterns = patterns(
         views.Activation.as_view(),
         name='activate'
     ),
+    url(
+        r'^signin/$',
+        views.Signin.as_view(),
+        name='signin'
+    ),
+    url(
+        r'^signout/$',
+        views.Signout.as_view(),
+        name='signout'
+    ),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

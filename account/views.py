@@ -191,3 +191,34 @@ class ActivationResend(APIView):
         except AccountException as e:
 
             return Response({'detail': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Signin(APIView):
+
+    serializer_class = serializers.AuthTokenSerializer
+
+    def post(self, request):
+
+        # block countries we are not licensed to operate in and tor clients
+        if country_blocked(request) or is_tor_node(request):
+            return Response(status=HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS)
+
+        serializer = self.serializer_class(data=request.DATA)
+
+        if serializer.is_valid():
+            authenticated_user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=authenticated_user)
+            return Response(
+                {'token': token.key, 'id': authenticated_user.id})
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Signout(APIView):
+
+    def post(self, request):
+
+        if request.auth is not None:
+            request.auth.delete()
+
+        return Response()

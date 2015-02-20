@@ -3,6 +3,7 @@ import random
 import re
 
 from django.conf import settings
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 
 from rest_framework import fields
@@ -12,7 +13,6 @@ from userena import settings as userena_settings
 from userena.models import UserenaSignup
 
 from account import constants
-from account.utils import AccountException
 
 
 class PasswordSerializer(serializers.Serializer):
@@ -88,3 +88,39 @@ class SignupSerializer(PasswordSerializer):
         )
 
         return new_user
+
+
+class AuthTokenSerializer(serializers.Serializer):
+    '''
+    customized version of standard rest serializer working
+    with email instead of username
+
+    see: https://github.com/tomchristie/django-rest-framework/blob/master/rest_framework/authtoken/serializers.py
+    '''
+
+    email = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, data):
+
+        email = data.get('email')
+        password = data.get('password')
+
+        user = authenticate(identification=email, password=password)
+
+        if user:
+
+            if user.is_staff:
+                raise serializers.ValidationError(constants.ADMIN_ACCOUNT)
+
+            if user.profile.account_deactivated:
+                raise serializers.ValidationError(constants.USER_ACCOUNT_DISABLED)
+
+            if not user.is_active:
+                raise serializers.ValidationError(constants.USER_ACCOUNT_NOT_ACTIVATED_YET)
+
+            data['user'] = user
+            return data
+
+        else:
+            raise serializers.ValidationError(constants.SIGNIN_WRONG_CREDENTIALS)
