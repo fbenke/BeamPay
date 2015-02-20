@@ -12,6 +12,7 @@ from userena import settings as userena_settings
 from userena.models import UserenaSignup
 
 from account import constants
+from account.utils import AccountException
 
 
 class PasswordSerializer(serializers.Serializer):
@@ -33,6 +34,11 @@ class PasswordSerializer(serializers.Serializer):
             if data['password1'] != data['password2']:
                 raise serializers.ValidationError(constants.PASSWORD_MISMATCH)
         return data
+
+
+class RequestEmailSerializer(serializers.Serializer):
+
+    email = fields.EmailField(label='Email')
 
 
 class SignupSerializer(PasswordSerializer):
