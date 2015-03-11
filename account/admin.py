@@ -29,6 +29,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         'user_url', 'user_email', 'name', 'country', 'accepted_privacy_policy',
+        'date_of_birth', 'phone_number'
     )
 
     fields = readonly_fields

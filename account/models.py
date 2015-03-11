@@ -16,14 +16,29 @@ class BeamProfile(UserenaBaseProfile):
         related_name='profile'
     )
 
+    date_of_birth = models.DateField(
+        'Date of Birth',
+        null=True,
+        blank=True,
+        help_text='Date of birth'
+    )
+
+    phone_number = models.CharField(
+        'Mobile Money Phone Number',
+        max_length=15,
+        blank=True,
+        help_text='Phone number'
+    )
+
     country = CountryField(
         'Country',
+        null=True,
         blank=True,
         help_text='Country'
     )
 
     accepted_privacy_policy = models.BooleanField(
-        'Privacy Policy accepted',
+        'Privacy policy accepted',
         default=True
     )
 
