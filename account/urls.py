@@ -31,10 +31,15 @@ urlpatterns = patterns(
         name='signin'
     ),
     url(
+        r'^signin/(?P<backend>[^/]+)/$',
+        views.SigninFacebook.as_view(),
+        name='signin_social'
+    ),
+    url(
         r'^signout/$',
         views.Signout.as_view(),
         name='signout'
-    ),
+    )
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -41,6 +41,7 @@ THIRD_PARTY_APPS = (
     'userena',
     'guardian',
     'easy_thumbnails',
+    'social.apps.django_app.default',
 )
 
 LOCAL_APPS = (
@@ -191,9 +192,14 @@ REST_FRAMEWORK = {
 # ==================== USERENA SETTINGS ====================
 
 AUTHENTICATION_BACKENDS = (
+    # Userena
     'userena.backends.UserenaAuthenticationBackend',
     'guardian.backends.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend',
+
+    # Facebook Graph
+    'social.backends.facebook.FacebookAppOAuth2',
+    'social.backends.facebook.FacebookOAuth2'
 )
 
 AUTH_PROFILE_MODULE = 'account.BeamProfile'
@@ -208,6 +214,13 @@ USERENA_HTML_EMAIL = True
 ANONYMOUS_USER_ID = -1
 
 PASSWORD_REGEX = r'^(?=.*\d).{8,}$'
+
+# ==================== PYTHON SOCIAL SETTINGS ================
+
+SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY')
+SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET')
+# TODO: which extra permissions shall we request here?
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
 # ==================== Email Settings ====================
 

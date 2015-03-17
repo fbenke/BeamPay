@@ -19,6 +19,8 @@ from beam_value.utils.log import log_error
 from beam_value.utils.ip_analysis import country_blocked, is_tor_node,\
     HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS
 
+from social.apps.django_app.utils import psa
+
 
 def send_activation_email(user, activation_key=None):
 
@@ -222,3 +224,40 @@ class Signout(APIView):
             request.auth.delete()
 
         return Response()
+
+
+@psa()
+def auth_by_token(request, backend):
+
+    user = request.backend.do_auth(
+        access_token=request.DATA.get('access_token')
+    )
+
+    if user and user.is_active:
+        return user
+    else:
+        return None
+
+
+class SigninFacebook(APIView):
+
+    def post(self, request, backend):
+
+        auth_token = request.DATA.get('access_token', None)
+
+        if auth_token and backend:
+
+            try:
+                user = auth_by_token(request, backend)
+
+            except Exception, err:
+                return Response({'detail': str(err)}, status=500)
+
+            if user:
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'token': token.key, 'id': user.id})
+
+            else:
+                return Response({'detail': constants.SIGNIN_FACEBOOK_INVALID_TOKEN}, status=400)
+        else:
+            return Response({'detail': constants.INVALID_PARAMETERS}, status=400)
