@@ -3,18 +3,18 @@
     {% if user.first_name %}
     <p>Hi {{ user.first_name }},</p>
     {% else %}
-    <p>Dear {{ site.name }} User,</p> 
+    <p>Dear Beam User,</p> 
     {% endif %}
     <p>
-        You requested to change your email address at {{ site.name }}.
+        You requested to change your email address at Beam.
     </p>
     <p>
         To confirm this email as your new address, please click on the link below:<br>
-        {{ protocol }}://{{ site.domain }}/{{ email_change_link }}
+        {{ email_change_url }}
     </p>
     <p>
         Sincerely,<br/>
-        The {{ site.name }} Team
+        The Beam Team
     </p>
 </body>
 </html>

@@ -2,14 +2,14 @@
 {% if user.first_name %}
 Hi {{ user.first_name }},
 {% else %}
-Dear {{ site.name }} User,
+Dear Beam User,
 {% endif %}
 
-You requested to change your email address at {{ site.name }}.
+You requested to change your email address at Beam.
 
 To confirm this email as your new address, please click on the link below:
-{{ protocol }}://{{ site.domain }}/{{ email_change_link }}
+{{ email_change_url }}
 
 Sincerely,
 
-The {{ site.name }} Team
+The Beam Team

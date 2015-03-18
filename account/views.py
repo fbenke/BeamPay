@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -224,6 +225,68 @@ class Signout(APIView):
             request.auth.delete()
 
         return Response()
+
+
+class EmailChange(APIView):
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        user = request.user
+        new_email = request.DATA.get('email', None)
+
+        try:
+
+            if not new_email:
+                raise AccountException(constants.INVALID_PARAMETERS)
+            if new_email.lower() == user.email:
+                raise AccountException(constants.EMAIL_NOT_CHANGED)
+            if User.objects.filter(email__iexact=new_email):
+                raise AccountException(constants.EMAIL_IN_USE)
+
+            # the following is a rewritten version of user.userena_signup.change_email(new_email)
+            user.userena_signup.email_unconfirmed = new_email
+            salt, hash = generate_sha1(user.username)
+            user.userena_signup.email_confirmation_key = hash
+            user.userena_signup.email_confirmation_key_created = get_datetime_now()
+            user.userena_signup.save()
+
+            # the purpose is rewriting the following part where the emails are sent out
+
+            email_change_url = settings.USER_BASE_URL +\
+                settings.MAIL_EMAIL_CHANGE_CONFIRM_URL.format(user.userena_signup.email_confirmation_key)
+
+            context = {
+                'user': user,
+                'email_change_url': email_change_url
+            }
+
+            # mail to new email account
+            mails.send_mail(
+                subject_template_name=settings.MAIL_CHANGE_EMAIL_NEW_SUBJECT,
+                email_template_name=settings.MAIL_CHANGE_EMAIL_NEW_TEXT,
+                html_email_template_name=settings.MAIL_CHANGE_EMAIL_NEW_HTML,
+                to_email=user.userena_signup.email_unconfirmed,
+                from_email=settings.BEAM_MAIL_ADDRESS,
+                context=context
+            )
+
+            context['support'] = settings.BEAM_SUPPORT_MAIL_ADDRESS
+            context['new_email'] = user.userena_signup.email_unconfirmed
+
+            # mail to old email account
+            mails.send_mail(
+                subject_template_name=settings.MAIL_CHANGE_EMAIL_OLD_SUBJECT,
+                email_template_name=settings.MAIL_CHANGE_EMAIL_OLD_TEXT,
+                html_email_template_name=settings.MAIL_CHANGE_EMAIL_OLD_HTML,
+                to_email=user.email,
+                from_email=settings.BEAM_MAIL_ADDRESS,
+                context=context
+            )
+            return Response()
+
+        except AccountException as e:
+            return Response({'detail': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @psa()

@@ -81,16 +81,16 @@ ENV_SITE_MAPPING = {
         SITE_USER: os.environ.get('LOCAL_SITE_USER'),
     },
     ENV_DEV: {
-        SITE_API: 'api-dev.beamremit.com',
-        SITE_USER: 'beamvalue-dev.herokuapp.com',
+        SITE_API: 'api-dev.beampay.co',
+        SITE_USER: 'dev.beampay.co',
     },
     ENV_VIP: {
-        SITE_API: 'api-vip.beamremit.com',
-        SITE_USER: 'beamvalue-vip.herokuapp.com',
+        SITE_API: 'api-vip.beampay.co',
+        SITE_USER: 'vip.beampay.co',
     },
     ENV_PROD: {
-        SITE_API: 'api.beamremit.com',
-        SITE_USER: 'beamvalue.herokuapp.com',
+        SITE_API: 'api.beampay.co',
+        SITE_USER: 'beampay.co',
     }
 }
 
@@ -222,6 +222,22 @@ SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET')
 # TODO: which extra permissions shall we request here?
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
+
+# SOCIAL_AUTH_PIPELINE = (
+#     'social.pipeline.social_auth.social_details',
+#     'social.pipeline.social_auth.social_uid',
+#     'social.pipeline.social_auth.auth_allowed',
+#     'social.pipeline.social_auth.social_user',
+#     'social.pipeline.user.get_username',
+#     # Associates the current social details with another user account with
+#     # a similar email address. Deactivated by default.
+#     'social.pipeline.social_auth.associate_by_email',
+#     'social.pipeline.user.create_user',
+#     'social.pipeline.social_auth.associate_user',
+#     'social.pipeline.social_auth.load_extra_data',
+#     'social.pipeline.user.user_details'
+# )
+
 # ==================== Email Settings ====================
 
 if ENV in (ENV_LOCAL,):
@@ -231,8 +247,8 @@ else:
     SENDGRID_USER = os.environ.get('SENDGRID_USERNAME')
     SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')
 
-BEAM_MAIL_ADDRESS = 'Beam <hello@beamremit.com>'
-
+BEAM_MAIL_ADDRESS = 'Beam <hello@beampay.co>'
+BEAM_SUPPORT_MAIL_ADDRESS = 'hello@beampay.co'
 # ==================== User Email templates ====================
 
 MAIL_ACTIVATION_SUBJECT = 'userena/emails/activation_email_subject.txt'

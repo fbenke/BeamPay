@@ -1,15 +1,15 @@
 {% if user.first_name %}
 Hi {{ user.first_name }},
 {% else %}
-Dear {{ site.name }} User,
+Dear Beam User,
 {% endif %}
 
-We’ve received a request to change the email address associated with your {{ site.name }} account.
+We’ve received a request to change the email address associated with your Beam account.
 
 A verification link has been sent to the new address: {{ new_email }}. Click on the verification link to activate your new email address.
 
-If you didn’t request to change your {{ site.name }} email address, please contact our support team immediately at {{ support }}.
+If you didn’t request to change your Beam email address, please contact our support team immediately at {{ support }}.
 
 Sincerely,
 
-The {{ site.name }} Team
+The Beam Team

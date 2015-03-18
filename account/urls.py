@@ -39,7 +39,12 @@ urlpatterns = patterns(
         r'^signout/$',
         views.Signout.as_view(),
         name='signout'
-    )
+    ),
+    url(
+        r'^email/$',
+        views.EmailChange.as_view(),
+        name='email_change'
+    ),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

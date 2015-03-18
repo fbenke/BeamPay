@@ -1,1 +1,1 @@
-Email verification for {{ site.name }}
+Email verification for Beam
