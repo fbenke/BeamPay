@@ -289,6 +289,19 @@ class EmailChange(APIView):
             return Response({'detail': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class EmailConfirm(APIView):
+
+    def get(self, request, *args, **kwargs):
+
+        confirmation_key = kwargs['confirmation_key']
+
+        user = UserenaSignup.objects.confirm_email(confirmation_key)
+        if user:
+            return Response()
+
+        return Response({'detail': constants.INVALID_PARAMETERS}, status.HTTP_400_BAD_REQUEST)
+
+
 @psa()
 def auth_by_token(request, backend):
 

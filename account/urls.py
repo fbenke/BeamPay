@@ -45,6 +45,11 @@ urlpatterns = patterns(
         views.EmailChange.as_view(),
         name='email_change'
     ),
+    url(
+        r'^confirm-email/(?P<confirmation_key>\w+)/$',
+        views.EmailConfirm.as_view(),
+        name='email_confirm'
+    ),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
