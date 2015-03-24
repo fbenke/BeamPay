@@ -13,6 +13,9 @@ from userena import settings as userena_settings
 from userena.models import UserenaSignup
 
 from account import constants
+from account import models
+
+from django_countries.fields import Country
 
 
 class PasswordSerializer(serializers.Serializer):
@@ -124,3 +127,82 @@ class AuthTokenSerializer(serializers.Serializer):
 
         else:
             raise serializers.ValidationError(constants.SIGNIN_WRONG_CREDENTIALS)
+
+
+class SetPasswordSerializer(PasswordSerializer):
+
+    '''
+    Serializer for resetting password without entering the old one.
+    Basically ports django.contrib.auth.forms.SetPasswordForm to a
+    Serializer to work with Django Rest Framework.
+    '''
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(SetPasswordSerializer, self).__init__(*args, **kwargs)
+
+
+class ChangePasswordSerializer(SetPasswordSerializer):
+    '''
+    Serializer for resetting password by entering the old one.
+    Basically ports django.contrib.auth.forms.PasswordChangeForm to a
+    Serializer to work with Django Rest Framework.
+    '''
+
+    old_password = serializers.CharField(label='Old password')
+
+    def validate_old_password(self, value):
+
+        if not self.user.check_password(value):
+            raise serializers.ValidationError(constants.PASSWORD_OLD_INCORRECT)
+
+        return value
+
+
+class CountryField(serializers.Field):
+
+    def to_representation(self, obj):
+        return str(obj)
+
+    def to_internal_value(self, data):
+        return Country(code=data)
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+    country = CountryField()
+
+    class Meta:
+        model = models.BeamProfile
+        read_only_fields = ()
+        read_and_write_fields = ('date_of_birth', 'phone_number', 'country')
+
+        fields = read_only_fields + read_and_write_fields
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    profile = ProfileSerializer(many=False)
+
+    class Meta:
+        model = User
+        read_only_fields = ('email', )
+        read_and_write_fields = ('first_name', 'last_name', 'profile')
+
+        fields = read_only_fields + read_and_write_fields
+
+    def update(self, instance, validated_data):
+
+        instance.first_name = validated_data.get('first_name')
+        instance.last_name = validated_data.get('last_name')
+
+        profile = validated_data.get('profile')
+
+        instance.profile.date_of_birth = profile.get('date_of_birth')
+        instance.profile.phone_number = profile.get('phone_number')
+        instance.profile.country = profile.get('country')
+
+        instance.profile.save()
+        instance.save()
+
+        return instance

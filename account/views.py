@@ -1,9 +1,14 @@
 from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator as token_generator
 from django.contrib.auth.models import User
+from django.db import transaction as dbtransaction
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
 
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework import permissions
+from rest_framework.authtoken.models import Token
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,6 +17,7 @@ from userena.utils import generate_sha1, get_datetime_now
 
 from account import serializers
 from account import constants
+from account.models import BeamProfile as Profile
 from account.utils import AccountException
 
 from beam_value.utils import mails
@@ -252,7 +258,6 @@ class EmailChange(APIView):
             user.userena_signup.save()
 
             # the purpose is rewriting the following part where the emails are sent out
-
             email_change_url = settings.USER_BASE_URL +\
                 settings.MAIL_EMAIL_CHANGE_CONFIRM_URL.format(user.userena_signup.email_confirmation_key)
 
@@ -302,6 +307,134 @@ class EmailConfirm(APIView):
         return Response({'detail': constants.INVALID_PARAMETERS}, status.HTTP_400_BAD_REQUEST)
 
 
+class PasswordReset(APIView):
+    'DRF version of django.contrib.auth.views.password_reset'
+
+    serializer_class = serializers.RequestEmailSerializer
+
+    def post(self, request):
+        try:
+            serializer = self.serializer_class(data=request.DATA)
+
+            if serializer.is_valid():
+
+                try:
+                    user = User.objects.get(email__iexact=serializer.validated_data['email'])
+
+                except User.DoesNotExist:
+                    raise AccountException(constants.EMAIL_UNKNOWN)
+
+                if user.profile.account_deactivated:
+                    raise AccountException(constants.USER_ACCOUNT_DISABLED)
+
+                if not user.is_active:
+                    raise AccountException(constants.USER_ACCOUNT_NOT_ACTIVATED_YET)
+
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = token_generator.make_token(user)
+
+                password_reset_url = settings.USER_BASE_URL +\
+                    settings.MAIL_PASSWORD_RESET_URL.format(uid, token)
+
+                context = {
+                    'password_reset_url': password_reset_url,
+                    'first_name': user.first_name,
+                }
+
+                mails.send_mail(
+                    subject_template_name=settings.MAIL_PASSWORD_RESET_SUBJECT,
+                    email_template_name=settings.MAIL_PASSWORD_RESET_TEXT,
+                    html_email_template_name=settings.MAIL_PASSWORD_RESET_HTML,
+                    context=context,
+                    from_email=settings.BEAM_MAIL_ADDRESS,
+                    to_email=user.email
+                )
+
+                return Response()
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except AccountException as e:
+            return Response({'detail': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetConfirm(APIView):
+    'DRF version of django.contrib.auth.views.password_reset_confirm'
+
+    serializer_class = serializers.SetPasswordSerializer
+
+    def _get_user(self, uidb64, token):
+
+        try:
+            uid = urlsafe_base64_decode(uidb64)
+            user = User.objects.get(pk=uid)
+
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and token_generator.check_token(user, token):
+            return user
+
+        return None
+
+    def get(self, request, *args, **kwargs):
+
+        uidb64 = kwargs['uidb64']
+        token = kwargs['token']
+
+        if self._get_user(uidb64, token):
+            return Response()
+
+        return Response({'detail': constants.INVALID_PARAMETERS}, status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request, *args, **kwargs):
+
+        uidb64 = kwargs['uidb64']
+        token = kwargs['token']
+
+        user = self._get_user(uidb64, token)
+
+        if not user:
+            return Response({'detail': constants.INVALID_PARAMETERS})
+
+        serializer = self.serializer_class(user=user, data=request.DATA)
+
+        if serializer.is_valid():
+
+            user.set_password(request.DATA['password1'])
+            user.save()
+
+            return Response()
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordChange(APIView):
+
+    serializer_class = serializers.ChangePasswordSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+
+        user = request.user
+        serializer = self.serializer_class(user=user, data=request.DATA)
+
+        if serializer.is_valid():
+
+            user.set_password(request.DATA['password1'])
+            user.save()
+
+            # issue new token for user
+            request.auth.delete()
+            token, _ = Token.objects.get_or_create(user=user)
+
+            return Response({'token': token.key})
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @psa()
 def auth_by_token(request, backend):
 
@@ -337,3 +470,43 @@ class SigninFacebook(APIView):
                 return Response({'detail': constants.SIGNIN_FACEBOOK_INVALID_TOKEN}, status=400)
         else:
             return Response({'detail': constants.INVALID_PARAMETERS}, status=400)
+
+
+class ProfileView(RetrieveUpdateDestroyAPIView):
+
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = serializers.UserSerializer
+
+    def get_object(self, queryset=None):
+        user = self.request.user
+        return User.objects.get(id=user.id)
+
+    def update(self, request, *args, **kwargs):
+
+        with dbtransaction.atomic():
+
+            response = super(ProfileView, self).update(request, args, kwargs)
+
+            if response.status_code == status.HTTP_200_OK:
+                # clear response data
+                response.data = {}
+
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        '''
+        customized to set active=false and delete
+        token upon deletion of a user
+        '''
+
+        obj = self.get_object()
+
+        # deactiveate users
+        obj.is_active = False
+        obj.save()
+
+        # delete authentication token
+        if request.auth is not None:
+            request.auth.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -50,6 +50,26 @@ urlpatterns = patterns(
         views.EmailConfirm.as_view(),
         name='email_confirm'
     ),
+    url(
+        r'^password/reset/$',
+        views.PasswordReset.as_view(),
+        name='password_reset'
+    ),
+    url(
+        r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+        views.PasswordResetConfirm.as_view(),
+        name='password_reset_confirm'
+    ),
+    url(
+        r'^password/$',
+        views.PasswordChange.as_view(),
+        name='password_change'
+    ),
+    url(
+        r'^profile/$',
+        views.ProfileView.as_view(),
+        name='profile'
+    ),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
