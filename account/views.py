@@ -443,8 +443,9 @@ class SigninFacebook(APIView):
     def post(self, request, backend):
 
         auth_token = request.DATA.get('access_token', None)
+        accepted_privacy_policy = request.DATA.get('accepted_privacy_policy', None)
 
-        if auth_token and backend:
+        if auth_token and backend and accepted_privacy_policy:
 
             try:
                 user = auth_by_token(request, backend)
