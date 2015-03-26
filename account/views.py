@@ -14,10 +14,10 @@ from rest_framework.views import APIView
 
 from userena.models import UserenaSignup
 from userena.utils import generate_sha1, get_datetime_now
+from userena import settings as userena_settings
 
 from account import serializers
 from account import constants
-from account.models import BeamProfile as Profile
 from account.utils import AccountException
 
 from beam_value.utils import mails
@@ -438,21 +438,14 @@ class PasswordChange(APIView):
 @psa()
 def auth_by_token(request, backend):
 
-    user = request.backend.do_auth(
-        access_token=request.DATA.get('access_token')
-    )
-
-    if user and user.is_active:
-        return user
-    else:
-        return None
+    return request.backend.do_auth(access_token=request.DATA.get('token'))
 
 
 class SigninFacebook(APIView):
 
     def post(self, request, backend):
 
-        auth_token = request.DATA.get('access_token', None)
+        auth_token = request.DATA.get('token', None)
 
         if auth_token and backend:
 
@@ -460,16 +453,45 @@ class SigninFacebook(APIView):
                 user = auth_by_token(request, backend)
 
             except Exception, err:
-                return Response({'detail': str(err)}, status=500)
+                return Response(
+                    {'detail': constants.SIGNIN_FACEBOOK_NOT_LOGGED_IN,
+                     'msg': str(err)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
             if user:
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({'token': token.key, 'id': user.id})
+
+                # active user was created or matched via email
+                if user.is_active:
+                    token, created = Token.objects.get_or_create(user=user)
+                    return Response({'token': token.key, 'id': user.id})
+
+                # user was found, but is deactivated
+                elif user.profile.account_deactivated:
+                    return Response(
+                        {'detail': constants.USER_ACCOUNT_DISABLED},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                # inactive user was found
+                else:
+                    user.userena_signup.activation_key = userena_settings.USERENA_ACTIVATED
+                    user.is_active = True
+                    user.userena_signup.save()
+                    user.save()
+                    token, created = Token.objects.get_or_create(user=user)
+                    return Response({'token': token.key, 'id': user.id})
 
             else:
-                return Response({'detail': constants.SIGNIN_FACEBOOK_INVALID_TOKEN}, status=400)
+                return Response(
+                    {'detail': constants.SIGNIN_FACEBOOK_INVALID_TOKEN},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         else:
-            return Response({'detail': constants.INVALID_PARAMETERS}, status=400)
+            return Response(
+                {'detail': constants.INVALID_PARAMETERS},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ProfileView(RetrieveUpdateDestroyAPIView):
