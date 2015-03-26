@@ -2,6 +2,9 @@ from django.conf import settings
 
 from social.apps.django_app.utils import psa
 
+from userena import settings as userena_settings
+from userena.models import UserenaSignup
+
 from account.models import BeamProfile as Profile
 
 from beam_value.utils.exceptions import APIException
@@ -36,3 +39,13 @@ def save_profile(backend, user, response, *args, **kwargs):
         new_profile.gender = response.get('gender')
         new_profile.facebook_link = response.get('link')
         new_profile.save()
+
+    try:
+        userena_signup = user.userena_signup
+
+    except UserenaSignup.DoesNotExist:
+        userena_signup = UserenaSignup(
+            user=user,
+            activation_key=userena_settings.USERENA_ACTIVATED
+        )
+        userena_signup.save()
