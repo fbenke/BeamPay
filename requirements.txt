@@ -12,6 +12,7 @@ django-sslify==0.2.5
 django-toolbelt==0.0.1
 django-userena==1.4.0
 djangorestframework==3.0.5
+djangorestframework-camel-case==0.2.0
 easy-thumbnails==2.2
 gunicorn==19.2.1
 html2text==2015.2.18
