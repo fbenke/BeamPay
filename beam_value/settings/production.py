@@ -167,13 +167,14 @@ REST_FRAMEWORK = {
     ),
     # input formats the API can handle
     'DEFAULT_PARSER_CLASSES': (
+        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
         'beam_value.utils.parsers.CamelCaseJSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser'
     ),
     #  output formate supported by the API
     'DEFAULT_RENDERER_CLASSES': (
-        'beam_value.utils.renderers.CamelCaseJSONRenderer',
+        'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer'
     ),
     # throttling of requests

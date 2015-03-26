@@ -445,7 +445,7 @@ class SigninFacebook(APIView):
 
     def post(self, request, backend):
 
-        auth_token = request.DATA.get('token', None)
+        auth_token = request.DATA.get('access_token', None)
 
         if auth_token and backend:
 
@@ -464,7 +464,7 @@ class SigninFacebook(APIView):
                 # active user was created or matched via email
                 if user.is_active:
                     token, created = Token.objects.get_or_create(user=user)
-                    return Response({'token': token.key, 'id': user.id})
+                    return Response({'access_token': token.key, 'id': user.id})
 
                 # user was found, but is deactivated
                 elif user.profile.account_deactivated:
