@@ -218,6 +218,7 @@ PASSWORD_REGEX = r'^(?=.*\d).{8,}$'
 
 # ==================== PYTHON SOCIAL SETTINGS ================
 
+SOCIAL_AUTH_FACEBOOK = 'facebook'
 SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET')
 # TODO: which extra permissions shall we request here?
@@ -233,7 +234,11 @@ SOCIAL_AUTH_PIPELINE = (
     # Associates the current social details with another user account with
     # a similar email address. Deactivated by default.
     'social.pipeline.social_auth.associate_by_email',
+    # make sure that social account is verfified
+    'account.social_auth.reject_not_verified',
     'social.pipeline.user.create_user',
+    # Create and populate a profile with available data, if it has not happened yet
+    'account.social_auth.save_profile',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details'

@@ -42,6 +42,20 @@ class BeamProfile(UserenaBaseProfile):
         default=True
     )
 
+    gender = models.CharField(
+        'Gender',
+        max_length=15,
+        blank=True,
+        help_text='Gender'
+    )
+
+    facebook_link = models.CharField(
+        'Facebook Link',
+        max_length=100,
+        blank=True,
+        help_text='Link to Facebook Profile'
+    )
+
     @property
     def account_deactivated(self):
         return (self.user.userena_signup.activation_key == userena_settings.USERENA_ACTIVATED

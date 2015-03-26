@@ -174,7 +174,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.BeamProfile
-        read_only_fields = ()
+        read_only_fields = ('gender',)
         read_and_write_fields = ('date_of_birth', 'phone_number', 'country')
 
         fields = read_only_fields + read_and_write_fields

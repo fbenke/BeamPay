@@ -1,3 +1,5 @@
+from requests import HTTPError
+
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator as token_generator
 from django.contrib.auth.models import User
@@ -20,13 +22,14 @@ from account import serializers
 from account import constants
 from account.utils import AccountException
 
+from account.social_auth import auth_by_token
+
 from beam_value.utils import mails
+from beam_value.utils.exceptions import APIException
 from beam_value.utils.log import log_error
 
 from beam_value.utils.ip_analysis import country_blocked, is_tor_node,\
     HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS
-
-from social.apps.django_app.utils import psa
 
 
 def send_activation_email(user, activation_key=None):
@@ -435,12 +438,6 @@ class PasswordChange(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@psa()
-def auth_by_token(request, backend):
-
-    return request.backend.do_auth(access_token=request.DATA.get('token'))
-
-
 class SigninFacebook(APIView):
 
     def post(self, request, backend):
@@ -452,10 +449,14 @@ class SigninFacebook(APIView):
             try:
                 user = auth_by_token(request, backend)
 
-            except Exception, err:
+            except HTTPError:
                 return Response(
-                    {'detail': constants.SIGNIN_FACEBOOK_NOT_LOGGED_IN,
-                     'msg': str(err)},
+                    {'detail': constants.SIGNIN_FACEBOOK_NOT_LOGGED_IN},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except APIException:
+                return Response(
+                    {'detail': constants.SIGNIN_FACEBOOK_NOT_VERIFIED},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
