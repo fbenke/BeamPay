@@ -310,6 +310,32 @@ class EmailConfirm(APIView):
         return Response({'detail': constants.INVALID_PARAMETERS}, status.HTTP_400_BAD_REQUEST)
 
 
+class PasswordSet(APIView):
+
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = serializers.SetPasswordSerializer
+
+    def get(self, request, *args, **kwargs):
+        return Response(
+            {'password_set': request.user.has_usable_password()}
+        )
+
+    def post(self, request):
+
+        user = request.user
+        serializer = self.serializer_class(user=user, data=request.DATA)
+
+        if serializer.is_valid():
+
+            user.set_password(request.DATA['password1'])
+            user.save()
+
+            return Response()
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class PasswordReset(APIView):
     'DRF version of django.contrib.auth.views.password_reset'
 
@@ -423,6 +449,11 @@ class PasswordChange(APIView):
         user = request.user
         serializer = self.serializer_class(user=user, data=request.DATA)
 
+        if not user.has_usable_password():
+            return Response(
+                {'detail': constants.NO_PASSWORD_SET},
+                status=status.HTTP_400_BAD_REQUEST)
+
         if serializer.is_valid():
 
             user.set_password(request.DATA['password1'])
@@ -435,12 +466,16 @@ class PasswordChange(APIView):
             return Response({'token': token.key})
 
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SigninFacebook(APIView):
 
     def post(self, request, backend):
+
+        if country_blocked(request) or is_tor_node(request):
+            return Response(status=HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS)
 
         auth_token = request.DATA.get('access_token', None)
         accepted_privacy_policy = request.DATA.get('accepted_privacy_policy', None)
@@ -450,23 +485,13 @@ class SigninFacebook(APIView):
             try:
                 user = auth_by_token(request, backend)
 
-            except HTTPError:
-                return Response(
-                    {'detail': constants.SIGNIN_FACEBOOK_NOT_LOGGED_IN},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            except APIException:
-                return Response(
-                    {'detail': constants.SIGNIN_FACEBOOK_NOT_VERIFIED},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            if user:
-
                 # active user was created or matched via email
                 if user.is_active:
                     token, created = Token.objects.get_or_create(user=user)
-                    return Response({'access_token': token.key, 'id': user.id})
+                    return Response(
+                        {'access_token': token.key, 'id': user.id},
+                        status=status.HTTP_201_CREATED
+                    )
 
                 # user was found, but is deactivated
                 elif user.profile.account_deactivated:
@@ -482,13 +507,22 @@ class SigninFacebook(APIView):
                     user.userena_signup.save()
                     user.save()
                     token, created = Token.objects.get_or_create(user=user)
-                    return Response({'token': token.key, 'id': user.id})
+                    return Response(
+                        {'access_token': token.key, 'id': user.id},
+                        status=status.HTTP_201_CREATED
+                    )
 
-            else:
+            except HTTPError:
                 return Response(
-                    {'detail': constants.SIGNIN_FACEBOOK_INVALID_TOKEN},
+                    {'detail': constants.SIGNIN_FACEBOOK_NOT_LOGGED_IN},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+            except APIException:
+                return Response(
+                    {'detail': constants.SIGNIN_FACEBOOK_NOT_VERIFIED},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         else:
             return Response(
                 {'detail': constants.INVALID_PARAMETERS},

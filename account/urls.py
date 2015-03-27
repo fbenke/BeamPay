@@ -51,6 +51,11 @@ urlpatterns = patterns(
         name='email_confirm'
     ),
     url(
+        r'^password/set/$',
+        views.PasswordSet.as_view(),
+        name='password_set'
+    ),
+    url(
         r'^password/reset/$',
         views.PasswordReset.as_view(),
         name='password_reset'
