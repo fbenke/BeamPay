@@ -28,8 +28,8 @@ class BeamProfileAdmin(admin.ModelAdmin):
         return '{} {}'.format(obj.user.first_name, obj.user.last_name)
 
     readonly_fields = (
-        'user_url', 'user_email', 'name', 'country', 'accepted_privacy_policy',
-        'date_of_birth', 'phone_number', 'gender', 'facebook_link'
+        'user_url', 'user_email', 'name', 'street', 'city', 'post_code', 'country',
+        'accepted_privacy_policy', 'date_of_birth', 'phone_number', 'gender', 'facebook_link'
     )
 
     fields = readonly_fields

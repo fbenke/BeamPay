@@ -175,7 +175,10 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.BeamProfile
         read_only_fields = ('gender',)
-        read_and_write_fields = ('date_of_birth', 'phone_number', 'country')
+        read_and_write_fields = (
+            'date_of_birth', 'phone_number', 'street', 'city',
+            'post_code', 'country'
+        )
 
         fields = read_only_fields + read_and_write_fields
 
@@ -201,6 +204,9 @@ class UserSerializer(serializers.ModelSerializer):
         instance.profile.date_of_birth = profile.get('date_of_birth')
         instance.profile.phone_number = profile.get('phone_number')
         instance.profile.country = profile.get('country')
+        instance.profile.street = profile.get('street')
+        instance.profile.city = profile.get('city')
+        instance.profile.post_code = profile.get('post_code')
 
         instance.profile.save()
         instance.save()

@@ -234,7 +234,7 @@ SOCIAL_AUTH_PIPELINE = (
     # Associates the current social details with another user account with
     # a similar email address. Deactivated by default.
     'social.pipeline.social_auth.associate_by_email',
-    # make sure that social account is verfified
+    # Make sure that social account is verfified
     'account.social_auth.reject_not_verified',
     'social.pipeline.user.create_user',
     # Create and populate a profile with available data, if it has not happened yet

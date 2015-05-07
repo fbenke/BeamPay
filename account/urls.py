@@ -52,7 +52,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^password/set/$',
-        views.PasswordSet.as_view(),
+        views.PasswordSetSocial.as_view(),
         name='password_set'
     ),
     url(

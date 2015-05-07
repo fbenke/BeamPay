@@ -307,10 +307,10 @@ class EmailConfirm(APIView):
         if user:
             return Response()
 
-        return Response({'detail': constants.INVALID_PARAMETERS}, status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': constants.INVALID_PARAMETERS}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PasswordSet(APIView):
+class PasswordSetSocial(APIView):
 
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = serializers.SetPasswordSerializer
@@ -324,6 +324,9 @@ class PasswordSet(APIView):
 
         user = request.user
         serializer = self.serializer_class(user=user, data=request.DATA)
+
+        if user.has_usable_password():
+            return Response({'detail': constants.PASSWORD_SET}, status=status.HTTP_400_BAD_REQUEST)
 
         if serializer.is_valid():
 

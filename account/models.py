@@ -24,17 +24,38 @@ class BeamProfile(UserenaBaseProfile):
     )
 
     phone_number = models.CharField(
-        'Mobile Money Phone Number',
+        'Phone Number',
         max_length=15,
         blank=True,
         help_text='Phone number'
+    )
+
+    street = models.CharField(
+        'Street and number',
+        max_length=50,
+        blank=True,
+        help_text='Street and number'
+    )
+
+    post_code = models.CharField(
+        'Post Code',
+        max_length=50,
+        blank=True,
+        help_text='Post Code'
+    )
+
+    city = models.CharField(
+        'City',
+        max_length=40,
+        blank=True,
+        help_text='City'
     )
 
     country = CountryField(
         'Country',
         null=True,
         blank=True,
-        help_text='Country'
+        help_text='Country of Current Residence'
     )
 
     accepted_privacy_policy = models.BooleanField(
