@@ -218,10 +218,11 @@ PASSWORD_REGEX = r'^(?=.*\d).{8,}$'
 
 # ==================== PYTHON SOCIAL SETTINGS ================
 
+# Facebook, http://python-social-auth.readthedocs.org/en/latest/backends/facebook.html
 SOCIAL_AUTH_FACEBOOK = 'facebook'
 SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET')
-# TODO: which extra permissions shall we request here?
+# TODO: which extra permissions shall we request here? why is it needed in the first place?
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
 
