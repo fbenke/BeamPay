@@ -14,7 +14,6 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-
 from userena.models import UserenaSignup
 from userena.utils import generate_sha1, get_datetime_now
 from userena import settings as userena_settings
