@@ -7,12 +7,12 @@ from django.db import transaction as dbtransaction
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 
+from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from userena.models import UserenaSignup
 from userena.utils import generate_sha1, get_datetime_now
