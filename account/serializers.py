@@ -196,17 +196,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
 
-        instance.first_name = validated_data.get('first_name')
-        instance.last_name = validated_data.get('last_name')
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
 
         profile = validated_data.get('profile')
 
-        instance.profile.date_of_birth = profile.get('date_of_birth')
-        instance.profile.phone_number = profile.get('phone_number')
-        instance.profile.country = profile.get('country')
-        instance.profile.street = profile.get('street')
-        instance.profile.city = profile.get('city')
-        instance.profile.post_code = profile.get('post_code')
+        instance.profile.date_of_birth = profile.get('date_of_birth', instance.profile.date_of_birth)
+        instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
+        instance.profile.country = profile.get('country', instance.profile.country)
+        instance.profile.street = profile.get('street', instance.profile.street)
+        instance.profile.city = profile.get('city', instance.profile.city)
+        instance.profile.post_code = profile.get('post_code', instance.profile.post_code)
 
         instance.profile.save()
         instance.save()
