@@ -224,7 +224,7 @@ SOCIAL_AUTH_FACEBOOK = 'facebook'
 SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET')
 # TODO: which extra permissions shall we request here? why is it needed in the first place?
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'profile', 'user_friends']
 
 
 SOCIAL_AUTH_PIPELINE = (
@@ -237,6 +237,8 @@ SOCIAL_AUTH_PIPELINE = (
     # a similar email address. Deactivated by default.
     'social.pipeline.social_auth.associate_by_email',
     # Make sure that social account is verfified
+    'account.social_auth.reject_no_email',
+    # Make sure that social account has provided an email
     'account.social_auth.reject_not_verified',
     'social.pipeline.user.create_user',
     # Create and populate a profile with available data, if it has not happened yet

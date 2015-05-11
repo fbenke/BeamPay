@@ -6,6 +6,7 @@ from userena import settings as userena_settings
 from userena.models import UserenaSignup
 
 from account.models import BeamProfile as Profile
+from account.utils import AccountException
 
 from beam_value.utils.exceptions import APIException
 
@@ -14,6 +15,14 @@ from beam_value.utils.exceptions import APIException
 def auth_by_token(request, backend):
 
     return request.backend.do_auth(access_token=request.DATA.get('access_token'))
+
+
+def reject_no_email(backend, user, response, *args, **kwargs):
+
+    if backend.name == settings.SOCIAL_AUTH_FACEBOOK:
+
+        if not response.get('email'):
+            raise AccountException()
 
 
 def reject_not_verified(backend, user, response, *args, **kwargs):
