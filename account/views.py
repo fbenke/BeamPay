@@ -546,6 +546,7 @@ class ProfileView(RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.UserSerializer
 
     def get_object(self, queryset=None):
+
         user = self.request.user
         return User.objects.get(id=user.id)
 
