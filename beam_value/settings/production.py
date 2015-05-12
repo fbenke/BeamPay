@@ -144,7 +144,7 @@ LOGGING = {
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Django CORS headers
-if ENV == ENV_LOCAL:
+if ENV in (ENV_LOCAL, ENV_DEV):
     CORS_ORIGIN_ALLOW_ALL = True
 else:
     CORS_ORIGIN_WHITELIST = (ENV_SITE_MAPPING[ENV][SITE_USER], )
@@ -223,9 +223,17 @@ PASSWORD_REGEX = r'^(?=.*\d).{8,}$'
 SOCIAL_AUTH_FACEBOOK = 'facebook'
 SOCIAL_AUTH_FACEBOOK_KEY = os.environ.get('FACEBOOK_KEY')
 SOCIAL_AUTH_FACEBOOK_SECRET = os.environ.get('FACEBOOK_SECRET')
-# TODO: which extra permissions shall we request here? why is it needed in the first place?
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'profile', 'user_friends']
 
+# if we ever decide to store the scope and app_id in one place, uncomment the
+# following two statements and write an API call for those
+# SOCIAL_AUTH_FACEBOOK_APP_ID = os.environ.get('FACEBOOK_APP_ID')
+# SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'profile']
+
+# if we ever want to retrieve age_range uncomment the following
+# SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
+#     'fields': 'age_range, first_name, last_name, verified, name,'
+#     'locale, gender, email, link, timezone, updated_time'
+# }
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',

@@ -18,7 +18,7 @@ def auth_by_token(request, backend):
 
 
 def reject_no_email(backend, user, response, *args, **kwargs):
-    print response
+
     if backend.name == settings.SOCIAL_AUTH_FACEBOOK:
 
         if not response.get('email'):
