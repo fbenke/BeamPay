@@ -285,7 +285,7 @@ MAIL_CHANGE_EMAIL_NEW_HTML = 'userena/emails/confirmation_email_message_new.html
 
 # User-Facing URLs in Email templates
 MAIL_ACTIVATION_URL = '#!/auth/activate/{}/'
-MAIL_EMAIL_CHANGE_CONFIRM_URL = '#!/settings/email/{}/'
+MAIL_EMAIL_CHANGE_CONFIRM_URL = '#!/auth/settings/email/{}/'
 MAIL_PASSWORD_RESET_URL = '#!/auth/forgot/{}-{}/'
 
 
