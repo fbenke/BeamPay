@@ -480,10 +480,11 @@ class SigninFacebook(APIView):
         if country_blocked(request) or is_tor_node(request):
             return Response(status=HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS)
 
-        auth_token = request.DATA.get('access_token', None)
+        code = request.DATA.get('code', None)
+        redirect_uri = request.DATA.get('redirect_uri', None)
         accepted_privacy_policy = request.DATA.get('accepted_privacy_policy', None)
 
-        if auth_token and backend and accepted_privacy_policy:
+        if backend and code and redirect_uri and accepted_privacy_policy:
 
             try:
                 user = auth_by_token(request, backend)
@@ -492,7 +493,7 @@ class SigninFacebook(APIView):
                 if user.is_active:
                     token, created = Token.objects.get_or_create(user=user)
                     return Response(
-                        {'access_token': token.key, 'id': user.id},
+                        {'token': token.key, 'id': user.id},
                         status=status.HTTP_201_CREATED
                     )
 
@@ -511,7 +512,7 @@ class SigninFacebook(APIView):
                     user.save()
                     token, created = Token.objects.get_or_create(user=user)
                     return Response(
-                        {'access_token': token.key, 'id': user.id},
+                        {'token': token.key, 'id': user.id},
                         status=status.HTTP_201_CREATED
                     )
 
