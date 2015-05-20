@@ -3,7 +3,7 @@ import requests
 from django.conf import settings
 
 from social.apps.django_app.utils import psa
-from social.utils import parse_qs, handle_http_errors
+from social.utils import parse_qs
 
 from userena import settings as userena_settings
 from userena.models import UserenaSignup
@@ -18,17 +18,16 @@ from beam_value.utils.exceptions import APIException
 @psa()
 def auth_by_token(request, backend):
 
+    key, secret = request.backend.get_key_and_secret()
+    response = requests.get(request.backend.ACCESS_TOKEN_URL, params={
+        'client_id': key,
+        'redirect_uri': request.DATA.get('redirect_uri'),
+        'client_secret': secret,
+        'code': request.DATA.get('code')
+    })
+
     try:
-        key, secret = request.backend.get_key_and_secret()
-        response = requests.get(request.backend.ACCESS_TOKEN_URL, params={
-            'client_id': key,
-            'redirect_uri': request.DATA.get('redirect_uri'),
-            'client_secret': secret,
-            'code': request.DATA.get('code')
-        })
-
         response = response.json()
-
     except ValueError:
         response = parse_qs(response.text)
 
