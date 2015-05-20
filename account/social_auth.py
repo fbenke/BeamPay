@@ -1,13 +1,14 @@
 import requests
-from urlparse import parse_qs
 
 from django.conf import settings
 
 from social.apps.django_app.utils import psa
+from social.utils import parse_qs, handle_http_errors
 
 from userena import settings as userena_settings
 from userena.models import UserenaSignup
 
+from account import constants
 from account.models import BeamProfile as Profile
 from account.utils import AccountException
 
@@ -17,39 +18,26 @@ from beam_value.utils.exceptions import APIException
 @psa()
 def auth_by_token(request, backend):
 
-    key, secret = request.backend.get_key_and_secret()
-    r = requests.get(request.backend.ACCESS_TOKEN_URL, params={
-        'client_id': key,
-        'redirect_uri': request.DATA.get('redirect_uri'),
-        'client_secret': secret,
-        'code': request.DATA.get('code')
-    })
+    try:
+        key, secret = request.backend.get_key_and_secret()
+        response = requests.get(request.backend.ACCESS_TOKEN_URL, params={
+            'client_id': key,
+            'redirect_uri': request.DATA.get('redirect_uri'),
+            'client_secret': secret,
+            'code': request.DATA.get('code')
+        })
+
+        response = response.json()
+
+    except ValueError:
+        response = parse_qs(response.text)
 
     try:
-        r = r.json()
-    except ValueError:
-        r = parse_qs(r.text)
+        access_token = response['access_token']
+        return request.backend.do_auth(access_token)
 
-    #
-    # TODO: Falk, you might wanna log errors if access_token is not found in
-    # `r`. Example, if there is something wrong with the FB app settings, you
-    # may get an error as such:
-    #
-    # {
-    #  "error":
-    #   {
-    #     "message":"Error validating verification code. Please make sure your
-    #         redirect_uri is identical to the one you used in the OAuth dialog
-    #         request",
-    #     "type":"OAuthException",
-    #     "code":100
-    #  }
-    # }
-    #
-
-    access_token = r['access_token']
-
-    return request.backend.do_auth(access_token)
+    except KeyError:
+        raise APIException(response['error']['message'])
 
 
 def reject_no_email(backend, user, response, *args, **kwargs):
@@ -57,7 +45,7 @@ def reject_no_email(backend, user, response, *args, **kwargs):
     if backend.name == settings.SOCIAL_AUTH_FACEBOOK:
 
         if not response.get('email'):
-            raise AccountException()
+            raise AccountException(constants.SIGNIN_FACEBOOK_NO_EMAIL)
 
 
 def reject_not_verified(backend, user, response, *args, **kwargs):
@@ -65,7 +53,7 @@ def reject_not_verified(backend, user, response, *args, **kwargs):
     if backend.name == settings.SOCIAL_AUTH_FACEBOOK:
 
         if not response.get('verified'):
-            raise APIException()
+            raise AccountException(constants.SIGNIN_FACEBOOK_NOT_VERIFIED)
 
 
 def save_profile(backend, user, response, *args, **kwargs):

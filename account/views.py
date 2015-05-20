@@ -516,22 +516,16 @@ class SigninFacebook(APIView):
                         status=status.HTTP_201_CREATED
                     )
 
-            except HTTPError:
+            except AccountException as e:
                 return Response(
-                    {'detail': constants.SIGNIN_FACEBOOK_NOT_LOGGED_IN},
+                    {'detail': e[0]},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            except AccountException:
+            except (HTTPError, APIException) as e:
                 return Response(
-                    {'detail': constants.SIGNIN_FACEBOOK_NO_EMAIL},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            except APIException:
-                return Response(
-                    {'detail': constants.SIGNIN_FACEBOOK_NOT_VERIFIED},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {'detail': e[0]},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
         else:
