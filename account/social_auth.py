@@ -19,11 +19,12 @@ from beam_value.utils.exceptions import APIException
 def auth_by_token(request, backend):
 
     key, secret = request.backend.get_key_and_secret()
+
     response = requests.get(request.backend.ACCESS_TOKEN_URL, params={
         'client_id': key,
-        'redirect_uri': request.DATA.get('redirect_uri'),
+        'redirect_uri': request.data.get('redirect_uri'),
         'client_secret': secret,
-        'code': request.DATA.get('code')
+        'code': request.data.get('code')
     })
 
     try:

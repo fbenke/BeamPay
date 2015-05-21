@@ -79,7 +79,7 @@ class Signup(APIView):
         if country_blocked(request) or is_tor_node(request):
             return Response(status=HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS)
 
-        serializer = self.serializer_class(data=request.DATA)
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
 
@@ -169,7 +169,7 @@ class ActivationResend(APIView):
 
         try:
 
-            serializer = self.serializer_class(data=request.DATA)
+            serializer = self.serializer_class(data=request.data)
 
             if serializer.is_valid():
 
@@ -214,7 +214,7 @@ class Signin(APIView):
         if country_blocked(request) or is_tor_node(request):
             return Response(status=HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS)
 
-        serializer = self.serializer_class(data=request.DATA)
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             authenticated_user = serializer.validated_data['user']
@@ -241,7 +241,7 @@ class EmailChange(APIView):
 
     def post(self, request):
         user = request.user
-        new_email = request.DATA.get('email', None)
+        new_email = request.data.get('email', None)
 
         try:
 
@@ -322,14 +322,14 @@ class PasswordSetSocial(APIView):
     def post(self, request):
 
         user = request.user
-        serializer = self.serializer_class(user=user, data=request.DATA)
+        serializer = self.serializer_class(user=user, data=request.data)
 
         if user.has_usable_password():
             return Response({'detail': constants.PASSWORD_SET}, status=status.HTTP_400_BAD_REQUEST)
 
         if serializer.is_valid():
 
-            user.set_password(request.DATA['password1'])
+            user.set_password(request.data.get('password1'))
             user.save()
 
             return Response()
@@ -345,7 +345,7 @@ class PasswordReset(APIView):
 
     def post(self, request):
         try:
-            serializer = self.serializer_class(data=request.DATA)
+            serializer = self.serializer_class(data=request.data)
 
             if serializer.is_valid():
 
@@ -428,11 +428,11 @@ class PasswordResetConfirm(APIView):
         if not user:
             return Response({'detail': constants.INVALID_PARAMETERS})
 
-        serializer = self.serializer_class(user=user, data=request.DATA)
+        serializer = self.serializer_class(user=user, data=request.data)
 
         if serializer.is_valid():
 
-            user.set_password(request.DATA['password1'])
+            user.set_password(request.data.get('password1'))
             user.save()
 
             return Response()
@@ -449,7 +449,7 @@ class PasswordChange(APIView):
     def post(self, request):
 
         user = request.user
-        serializer = self.serializer_class(user=user, data=request.DATA)
+        serializer = self.serializer_class(user=user, data=request.data)
 
         if not user.has_usable_password():
             return Response(
@@ -458,7 +458,7 @@ class PasswordChange(APIView):
 
         if serializer.is_valid():
 
-            user.set_password(request.DATA['password1'])
+            user.set_password(request.data.get('password1'))
             user.save()
 
             # issue new token for user
@@ -479,9 +479,9 @@ class SigninFacebook(APIView):
         if country_blocked(request) or is_tor_node(request):
             return Response(status=HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS)
 
-        code = request.DATA.get('code', None)
-        redirect_uri = request.DATA.get('redirect_uri', None)
-        accepted_privacy_policy = request.DATA.get('accepted_privacy_policy', None)
+        code = request.data.get('code', None)
+        redirect_uri = request.data.get('redirect_uri', None)
+        accepted_privacy_policy = request.data.get('accepted_privacy_policy', None)
 
         if backend and code and redirect_uri and accepted_privacy_policy:
 
