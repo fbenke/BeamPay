@@ -522,7 +522,9 @@ class SigninFacebook(APIView):
                 )
 
             except (HTTPError, APIException) as e:
-                
+
+                log_error('ERROR - Facebook Authentication Failed: {}'.format(e[0]))
+
                 return Response(
                     {'detail': e[0]},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
