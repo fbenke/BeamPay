@@ -81,3 +81,16 @@ class BeamProfile(UserenaBaseProfile):
     def account_deactivated(self):
         return (self.user.userena_signup.activation_key == userena_settings.USERENA_ACTIVATED
                 and not self.user.is_active)
+
+    @property
+    def information_complete(self):
+        if (
+            self.user.email == '' or self.user.first_name == '' or
+            self.user.last_name == '' or not self.user.is_active or
+            self.date_of_birth is None or self.date_of_birth == '' or
+            self.phone_number == '' or self.street == '' or
+            self.post_code == '' or self.city == '' or
+            self.country is None or self.country == ''
+        ):
+            return False
+        return True
