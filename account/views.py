@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from django.db import transaction as dbtransaction
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
-
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.authtoken.models import Token
@@ -523,6 +522,7 @@ class SigninFacebook(APIView):
                 )
 
             except (HTTPError, APIException) as e:
+                
                 return Response(
                     {'detail': e[0]},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR

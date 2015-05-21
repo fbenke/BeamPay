@@ -46,7 +46,8 @@ THIRD_PARTY_APPS = (
 
 LOCAL_APPS = (
     'beam_value',
-    'account'
+    'account',
+    'pricing',
 )
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
