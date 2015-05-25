@@ -1,7 +1,7 @@
+from django.conf import settings
 from django.conf.urls import patterns, url, include
 from django.contrib import admin
-from django.views.generic import TemplateView
-
+from django.views.generic import TemplateView, RedirectView
 
 admin.autodiscover()
 
@@ -13,12 +13,38 @@ urlpatterns = patterns(
         name='home'
     ),
     url(
+        r'^robots\.txt$',
+        TemplateView.as_view(template_name='robots.txt', content_type='text/plain'),
+        name='robots'
+    ),
+    url(
+        r'^humans\.txt$',
+        TemplateView.as_view(template_name='humans.txt', content_type='text/plain'),
+        name='humans'
+    ),
+    url(
+        r'^favicon\.ico$',
+        RedirectView.as_view(url=settings.STATIC_URL + 'img/favicon.png')
+    ),
+    url(
         r'^admin/',
         include(admin.site.urls)
     ),
     url(
         r'^api/v1/account/',
         include('account.urls', namespace='account')
+    ),
+    url(
+        r'^api/v1/pricing/',
+        include('pricing.urls', namespace='pricing')
+    ),
+    url(
+        r'^api/v1/transaction/',
+        include('transaction.urls', namespace='transaction')
+    ),
+    url(
+        r'^api/v1/recipient/',
+        include('recipient.urls', namespace='recipient')
     )
 )
 

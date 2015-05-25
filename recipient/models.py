@@ -18,7 +18,6 @@ class Recipient(models.Model):
 
     user = models.ForeignKey(
         User,
-        unique=True,
         related_name='recipients'
     )
 

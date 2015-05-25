@@ -48,6 +48,7 @@ LOCAL_APPS = (
     'beam_value',
     'account',
     'pricing',
+    'transaction',
     'recipient'
 )
 

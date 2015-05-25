@@ -24,6 +24,10 @@ def end_previous_object(cls):
             raise ObjectDoesNotExist
 
 
+def get_current_exchange_rate():
+    return get_current_object(ExchangeRate)
+
+
 class ExchangeRate(models.Model):
 
     start = models.DateTimeField(
