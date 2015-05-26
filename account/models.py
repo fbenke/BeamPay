@@ -14,12 +14,13 @@ class BeamProfile(UserenaBaseProfile):
     EMAIL = 'MAIL'
     SMS = 'SMS'
 
-    CONTAC_METHODS = (
+    CONTACT_METHODS = (PHONE, EMAIL, SMS)
+
+    CONTACT_METHOD_CHOICES = (
         (PHONE, 'phone call'),
         (EMAIL, 'email'),
         (SMS, 'sms'),
     )
-
 
     user = models.OneToOneField(
         User,
@@ -72,7 +73,7 @@ class BeamProfile(UserenaBaseProfile):
     preferred_contact_method = models.CharField(
         'Preferred Contact Method',
         max_length=4,
-        choices=CONTAC_METHODS,
+        choices=CONTACT_METHOD_CHOICES,
         default=PHONE,
         help_text='Preferred Contact Method'
     )

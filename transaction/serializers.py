@@ -12,6 +12,8 @@ from recipient.serializers import RecipientSerializer
 
 from pricing.models import get_current_exchange_rate
 
+from account.models import BeamProfile
+
 
 class CommentSerializer(serializers.ModelSerializer):
 
@@ -41,18 +43,29 @@ class CreateTransactionSerializer(serializers.ModelSerializer):
 
     recipient = RecipientSerializer(many=False, required=False)
     recipient_id = serializers.IntegerField(required=False)
+    preferred_contact_method = serializers.CharField(required=False)
 
     class Meta:
 
         model = models.Transaction
 
         fields = (
-            'recipient', 'recipient_id', 'transaction_type', 'additional_info'
+            'recipient', 'recipient_id', 'preferred_contact_method',
+            'transaction_type', 'additional_info'
         )
 
     def create(self, validated_data):
 
         user = validated_data.pop('user')
+
+        if validated_data.get('preferred_contact_method', None):
+
+            if validated_data.get('preferred_contact_method') not in BeamProfile.CONTACT_METHOD_CHOICES:
+                raise APIException(constants.INVALID_PARAMETERS)
+
+            user.profile.preferred_contact_method = validated_data.pop('preferred_contact_method')
+            user.profile.save()
+
         exchange_rate = get_current_exchange_rate()
 
         if validated_data.get('recipient', None):
