@@ -30,9 +30,9 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = models.Transaction
         depth = 1
         read_only_fields = (
-            'id', 'reference_number', 'state', 'last_changed',
-            'cost_of_delivery_usd', 'cost_of_delivery_ghs', 'service_charge',
-            'recipient', 'comments'
+            'id', 'reference_number', 'state', 'last_changed', 'transaction_type',
+            'additional_info', 'cost_of_delivery_usd', 'cost_of_delivery_ghs',
+            'service_charge', 'recipient', 'comments'
         )
         fields = read_only_fields + ()
 
@@ -47,8 +47,7 @@ class CreateTransactionSerializer(serializers.ModelSerializer):
         model = models.Transaction
 
         fields = (
-            'recipient', 'recipient_id',
-            'cost_of_delivery_usd', 'service_charge'
+            'recipient', 'recipient_id', 'transaction_type', 'additional_info'
         )
 
     def create(self, validated_data):

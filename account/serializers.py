@@ -175,7 +175,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('gender',)
         read_and_write_fields = (
             'date_of_birth', 'phone_number', 'street', 'city',
-            'post_code', 'country'
+            'post_code', 'country', 'preferred_contact_method'
         )
 
         fields = read_only_fields + read_and_write_fields
@@ -183,7 +183,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    profile = ProfileSerializer(many=False)
+    profile = ProfileSerializer(many=False, required=False)
 
     class Meta:
         model = User
@@ -207,6 +207,7 @@ class UserSerializer(serializers.ModelSerializer):
             instance.profile.street = profile.get('street', instance.profile.street)
             instance.profile.city = profile.get('city', instance.profile.city)
             instance.profile.post_code = profile.get('post_code', instance.profile.post_code)
+            instance.profile.preferred_contact_method = profile.get('preferred_contact_method', instance.profile.preferred_contact_method)
 
             instance.profile.save()
 

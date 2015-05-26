@@ -28,11 +28,26 @@ class BeamProfileAdmin(admin.ModelAdmin):
         return '{} {}'.format(obj.user.first_name, obj.user.last_name)
 
     readonly_fields = (
-        'user_url', 'user_email', 'name', 'street', 'city', 'post_code', 'country',
-        'accepted_privacy_policy', 'date_of_birth', 'phone_number', 'gender', 'facebook_link'
+        'user_url', 'user_email', 'name', 'street', 'city', 'post_code',
+        'country', 'accepted_privacy_policy', 'date_of_birth', 'phone_number',
+        'preferred_contact_method', 'gender', 'facebook_link'
     )
 
-    fields = readonly_fields
+    fieldsets = (
+        ('User', {
+            'fields': ('user_url', 'user_email', 'name')
+        }),
+        ('Profile', {
+            'fields': ('street', 'city', 'post_code', 'country',
+                       'date_of_birth', 'phone_number', 'preferred_contact_method')
+        }),
+        ('Misc', {
+            'classes': ('collapse',),
+            'fields': ('gender', 'facebook_link', 'accepted_privacy_policy')
+        })
+
+
+    )
 
     list_display = ('user_id', 'user_email', 'country')
 

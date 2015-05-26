@@ -10,6 +10,17 @@ from django_countries.fields import CountryField
 class BeamProfile(UserenaBaseProfile):
     ''' represents a sender user profile '''
 
+    PHONE = 'PHON'
+    EMAIL = 'MAIL'
+    SMS = 'SMS'
+
+    CONTAC_METHODS = (
+        (PHONE, 'phone call'),
+        (EMAIL, 'email'),
+        (SMS, 'sms'),
+    )
+
+
     user = models.OneToOneField(
         User,
         unique=True,
@@ -56,6 +67,14 @@ class BeamProfile(UserenaBaseProfile):
         null=True,
         blank=True,
         help_text='Country of Current Residence'
+    )
+
+    preferred_contact_method = models.CharField(
+        'Preferred Contact Method',
+        max_length=4,
+        choices=CONTAC_METHODS,
+        default=PHONE,
+        help_text='Preferred Contact Method'
     )
 
     accepted_privacy_policy = models.BooleanField(

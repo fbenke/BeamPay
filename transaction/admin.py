@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 
-from transaction.forms import CommentInlineFormset
+from transaction.forms import CommentInlineFormset, TransactionModelForm
 from transaction.models import Transaction, Comment
 
 
@@ -21,6 +21,8 @@ class CommentInline(admin.TabularInline):
 
 
 class TransactionAdmin(admin.ModelAdmin):
+
+    form = TransactionModelForm
 
     def sender_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
@@ -43,7 +45,7 @@ class TransactionAdmin(admin.ModelAdmin):
     def exchange_rate_url(self, obj):
         path = settings.API_BASE_URL + 'admin/pricing/exchangerate'
         return '<a href="{}/{}/">{}</a>'.format(
-            path, obj.exchange_rate.id, obj.exchange_rate.id)
+            path, obj.exchange_rate.id, obj.exchange_rate.usd_ghs)
 
     def sender_email(self, obj):
         return obj.sender.email
@@ -58,20 +60,25 @@ class TransactionAdmin(admin.ModelAdmin):
     recipient_name.short_description = 'recipient name'
 
     readonly_fields = (
-        'sender_url', 'recipient_url', 'exchange_rate_url', 'cost_of_delivery_usd',
-        'cost_of_delivery_ghs', 'service_charge', 'reference_number', 'last_changed'
+        'sender_url', 'recipient_url', 'exchange_rate_url', 'transaction_type',
+        'reference_number', 'last_changed', 'additional_info'
     )
+
+    read_and_write_fields = ()
 
     fieldsets = (
         (None, {
-            'fields': ('sender_url', 'recipient_url', 'exchange_rate_url',
-                       'cost_of_delivery_usd', 'cost_of_delivery_ghs',
-                       'service_charge', 'reference_number', 'state', 'last_changed')
+            'fields': ('sender_url', 'recipient_url', 'transaction_type', 'reference_number',
+                       'state', 'additional_info', 'last_changed')
         }),
+        ('Pricing', {
+            'fields': ('exchange_rate_url', 'cost_of_delivery_usd',
+                       'cost_of_delivery_ghs', 'service_charge')
+        })
     )
 
     list_display = (
-        'id', 'sender_email', 'recipient_name', 'reference_number', 'state'
+        'id', 'sender_email', 'recipient_name', 'transaction_type', 'reference_number', 'state'
     )
 
     list_filter = ('state',)
@@ -89,6 +96,12 @@ class TransactionAdmin(admin.ModelAdmin):
                 author=request.user,
                 comment=getattr(obj, 'state')
             )
+
+        if 'cost_of_delivery_ghs' in form.changed_data:
+            obj.cost_of_delivery_usd = getattr(obj, 'cost_of_delivery_ghs') / obj.exchange_rate.usd_ghs
+
+        elif 'cost_of_delivery_usd' in form.changed_data:
+            obj.cost_of_delivery_ghs = getattr(obj, 'cost_of_delivery_usd') * obj.exchange_rate.usd_ghs
 
         obj.save()
 

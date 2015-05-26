@@ -31,6 +31,24 @@ class Transaction(models.Model):
         (INVALID, 'invalid')
     )
 
+    UTILITY_BILL = 'UTIL'
+    GIFT = 'GIFT'
+    SCHOOL_FEE = 'SCHL'
+    HOSPITAL_BILL = 'HOSP'
+    INTERNET = 'INTR'
+    ERRAND = 'ERRD'
+    OTHER = 'OTHR'
+
+    TRANSACTION_TYPES = (
+        (UTILITY_BILL, 'utility bill'),
+        (GIFT, 'gift'),
+        (SCHOOL_FEE, 'school fee'),
+        (HOSPITAL_BILL, 'hospital bill'),
+        (INTERNET, 'internet'),
+        (ERRAND, 'errand'),
+        (OTHER, 'other')
+    )
+
     sender = models.ForeignKey(
         User,
         related_name='transactions',
@@ -41,6 +59,21 @@ class Transaction(models.Model):
         Recipient,
         related_name='transactions',
         help_text='Recipient associated with that transaction'
+    )
+
+    transaction_type = models.CharField(
+        'Type',
+        max_length=4,
+        choices=TRANSACTION_TYPES,
+        default=OTHER,
+        help_text='Categorization of service'
+    )
+
+    additional_info = models.CharField(
+        'Additional Information',
+        max_length=500,
+        blank=True,
+        help_text='Additional Information provided by user'
     )
 
     exchange_rate = models.ForeignKey(
