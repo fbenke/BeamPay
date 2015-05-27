@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+
+from beam_value.utils import mails
 
 from pricing.models import ExchangeRate, AirtimeServiceFee
 
@@ -136,6 +139,23 @@ class AirtimeTopup(models.Model):
     @property
     def charge_usd(self):
         return self.service_fee.fee + self.amount_ghs * self.exchange_rate.usd_ghs
+
+    def post_processed(self):
+
+        context = {
+            'first_name': self.sender.first_name,
+            'amount_ghs': self.amount_ghs,
+            'phone_number': self.phone_number,
+        }
+
+        mails.send_mail(
+            subject_template_name=settings.MAIL_AITRIME_TOPUP_COMPLETE_SUBJECT,
+            email_template_name=settings.MAIL_AITRIME_TOPUP_COMPLETE_TEXT,
+            context=context,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to_email=self.sender.email,
+            html_email_template_name=settings.MAIL_AITRIME_TOPUP_COMPLETE_HTML
+        )
 
 
 class Transaction(models.Model):

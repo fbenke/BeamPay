@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import admin
+from django.utils import timezone
 
 from transaction.forms import CommentInlineFormset, TransactionModelForm
 from transaction.models import Transaction, Comment, AirtimeTopup
@@ -111,6 +112,13 @@ admin.site.register(Transaction, TransactionAdmin)
 
 class AirtimeTopupAdmin(admin.ModelAdmin):
 
+    STATE_CHANGE_TIMESTAMP_FIELD = {
+        Transaction.PROCESSED: 'processed_at',
+        Transaction.PAID: 'paid_at',
+        Transaction.CANCELLED: 'cancelled_at',
+        Transaction.INVALID: 'invalidated_at'
+    }
+
     def sender_email(self, obj):
         return obj.sender.email
 
@@ -159,8 +167,8 @@ class AirtimeTopupAdmin(admin.ModelAdmin):
             'fields': ('exchange_rate_url', 'service_fee_url', 'amount_ghs', 'charge_usd')
         }),
         ('State', {
-            'fields': ('state', 'comments', 'initialized_at', 'paid_at',
-                       'processed_at', 'cancelled_at', 'invalidated_at')
+            'fields': ('state', 'initialized_at', 'paid_at', 'processed_at',
+                       'cancelled_at', 'invalidated_at', 'comments')
         })
     )
 
@@ -171,5 +179,17 @@ class AirtimeTopupAdmin(admin.ModelAdmin):
     search_fields = ('id', 'reference_number')
 
     list_per_page = 15
+
+    def save_model(self, request, obj, form, change):
+
+        if 'state' in form.changed_data:
+
+            timestamp_field = self.STATE_CHANGE_TIMESTAMP_FIELD[getattr(obj, 'state')]
+            setattr(obj, timestamp_field, timezone.now())
+
+            if obj.state == Transaction.PROCESSED:
+                obj.post_processed()
+
+        obj.save()
 
 admin.site.register(AirtimeTopup, AirtimeTopupAdmin)

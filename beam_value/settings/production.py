@@ -283,12 +283,15 @@ MAIL_CHANGE_EMAIL_NEW_SUBJECT = 'userena/emails/confirmation_email_subject_new.t
 MAIL_CHANGE_EMAIL_NEW_TEXT = 'userena/emails/confirmation_email_message_new.txt'
 MAIL_CHANGE_EMAIL_NEW_HTML = 'userena/emails/confirmation_email_message_new.html'
 
+MAIL_AITRIME_TOPUP_COMPLETE_SUBJECT = 'emails/airtime_topup_complete_subject.txt'
+MAIL_AITRIME_TOPUP_COMPLETE_TEXT = 'emails/airtime_topup_complete_message.txt'
+MAIL_AITRIME_TOPUP_COMPLETE_HTML = 'emails/airtime_topup_complete_message.html'
+
 
 # User-Facing URLs in Email templates
 MAIL_ACTIVATION_URL = '#!/auth/activate/{}/'
 MAIL_EMAIL_CHANGE_CONFIRM_URL = '#!/auth/settings/email/{}/'
 MAIL_PASSWORD_RESET_URL = '#!/auth/forgot/{}-{}/'
-
 
 # ==================== IP-based blocking ====================
 

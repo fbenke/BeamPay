@@ -121,7 +121,7 @@ class CreateAirtimeTopupSerializer(serializers.ModelSerializer):
         )
 
         airtime_topup.reference_number = generate_reference_number()
-        print airtime_topup.reference_number
+
         airtime_topup.save()
 
         return airtime_topup
