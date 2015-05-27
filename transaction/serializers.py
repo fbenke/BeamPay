@@ -6,11 +6,12 @@ from beam_value.utils.exceptions import APIException
 
 from transaction import models
 from transaction import constants
+from transaction.utils import generate_reference_number
 
 from recipient.models import Recipient
 from recipient.serializers import RecipientSerializer
 
-from pricing.models import get_current_exchange_rate
+from pricing.models import get_current_exchange_rate, get_current_airtime_fee
 
 from account.models import BeamProfile
 
@@ -91,7 +92,36 @@ class CreateTransactionSerializer(serializers.ModelSerializer):
             **validated_data
         )
 
-        transaction.generate_reference_number()
+        transaction.reference_number = generate_reference_number()
         transaction.save()
 
+        transaction.add_status_change('INIT')
+
         return transaction
+
+
+class CreateAirtimeTopupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.AirtimeTopup
+        fields = ('phone_number', 'network', 'amount_ghs')
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+
+        exchange_rate = get_current_exchange_rate()
+        airtime_fee = get_current_airtime_fee()
+
+        airtime_topup = models.AirtimeTopup.objects.create(
+            sender=user,
+            exchange_rate=exchange_rate,
+            service_fee=airtime_fee,
+            **validated_data
+        )
+
+        airtime_topup.reference_number = generate_reference_number()
+        print airtime_topup.reference_number
+        airtime_topup.save()
+
+        return airtime_topup

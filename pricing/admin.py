@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from pricing.models import ExchangeRate, end_previous_object
+from pricing.models import ExchangeRate, AirtimeServiceFee, end_previous_object
 
 
 class DoNotDeleteModelAdmin(admin.ModelAdmin):
@@ -30,3 +30,21 @@ class ExchangeRateAdmin(DoNotDeleteModelAdmin):
             obj.save()
 
 admin.site.register(ExchangeRate, ExchangeRateAdmin)
+
+
+class AirtimeServiceFeeAdmin(DoNotDeleteModelAdmin):
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('id', 'start', 'end', 'fee')
+        else:
+            return ('id', 'start', 'end')
+
+    list_display = ('id', 'start', 'end', 'fee')
+
+    def save_model(self, request, obj, form, change):
+        if not obj.id:
+            end_previous_object(AirtimeServiceFee)
+            obj.save()
+
+admin.site.register(AirtimeServiceFee, AirtimeServiceFeeAdmin)

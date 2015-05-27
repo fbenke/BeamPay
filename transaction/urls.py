@@ -13,6 +13,11 @@ urlpatterns = patterns(
         name='add'
     ),
     url(
+        r'^add/airtime/$',
+        views.CreateAirtimeTopup.as_view(),
+        name='add'
+    ),
+    url(
         r'^$',
         views.ViewTransactions.as_view(),
         name='list'

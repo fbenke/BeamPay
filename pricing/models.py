@@ -28,6 +28,10 @@ def get_current_exchange_rate():
     return get_current_object(ExchangeRate)
 
 
+def get_current_airtime_fee():
+    return get_current_object(AirtimeServiceFee)
+
+
 class ExchangeRate(models.Model):
 
     start = models.DateTimeField(
@@ -40,11 +44,31 @@ class ExchangeRate(models.Model):
         'End Time',
         blank=True,
         null=True,
-        help_text='Time at which exchange rate came ended. If null, it represents the current exchange rate.' +
-                  'Only one row in this table can have a null value for this column.'
+        help_text='Time at which exchange rate came ended.'
     )
 
     usd_ghs = models.FloatField(
         'USD to GHS Exchange Rate',
         help_text='Exchange Rate from USD to GHS without markup'
+    )
+
+
+class AirtimeServiceFee(models.Model):
+
+    start = models.DateTimeField(
+        'Start Time',
+        auto_now_add=True,
+        help_text='Time at which pricing structure came into effect'
+    )
+
+    end = models.DateTimeField(
+        'End Time',
+        blank=True,
+        null=True,
+        help_text='Time at which pricing ended.'
+    )
+
+    fee = models.FloatField(
+        'Service Fee in USD',
+        help_text='Service fee charged for the airtime topup.'
     )

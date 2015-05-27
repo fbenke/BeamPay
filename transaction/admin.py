@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 
 from transaction.forms import CommentInlineFormset, TransactionModelForm
-from transaction.models import Transaction, Comment
+from transaction.models import Transaction, Comment, AirtimeTopup
 
 
 class CommentInline(admin.TabularInline):
@@ -47,6 +47,9 @@ class TransactionAdmin(admin.ModelAdmin):
         return '<a href="{}/{}/">{}</a>'.format(
             path, obj.exchange_rate.id, obj.exchange_rate.usd_ghs)
 
+    exchange_rate_url.allow_tags = True
+    exchange_rate_url.short_description = 'exchange rate'
+
     def sender_email(self, obj):
         return obj.sender.email
 
@@ -63,8 +66,6 @@ class TransactionAdmin(admin.ModelAdmin):
         'sender_url', 'recipient_url', 'exchange_rate_url', 'transaction_type',
         'reference_number', 'last_changed', 'additional_info'
     )
-
-    read_and_write_fields = ()
 
     fieldsets = (
         (None, {
@@ -106,3 +107,69 @@ class TransactionAdmin(admin.ModelAdmin):
         obj.save()
 
 admin.site.register(Transaction, TransactionAdmin)
+
+
+class AirtimeTopupAdmin(admin.ModelAdmin):
+
+    def sender_email(self, obj):
+        return obj.sender.email
+
+    def sender_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/account/beamprofile'
+        return '<a href="{}/{}/">{} {}</a>'.format(
+            path, obj.sender.profile.id, obj.sender.first_name, obj.sender.last_name)
+
+    sender_url.allow_tags = True
+    sender_url.short_description = 'sender'
+
+    def exchange_rate_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/pricing/exchangerate'
+        return '<a href="{}/{}/">{}</a>'.format(
+            path, obj.exchange_rate.id, obj.exchange_rate.usd_ghs)
+
+    exchange_rate_url.allow_tags = True
+    exchange_rate_url.short_description = 'exchange rate'
+
+    def service_fee_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/pricing/airtimeservicefee'
+        return '<a href="{}/{}/">{}</a>'.format(
+            path, obj.service_fee.id, obj.service_fee.fee)
+
+    service_fee_url.allow_tags = True
+    service_fee_url.short_description = 'service fee'
+
+    def charge_usd(self, obj):
+        return obj.charge_usd
+
+    charge_usd.allow_tags = True
+    charge_usd.short_description = 'charge in usd'
+
+    readonly_fields = (
+        'id', 'sender_url', 'exchange_rate_url', 'service_fee_url',
+        'phone_number', 'network', 'amount_ghs', 'reference_number',
+        'initialized_at', 'paid_at', 'processed_at', 'cancelled_at',
+        'invalidated_at', 'charge_usd'
+    )
+
+    fieldsets = (
+        (None, {
+            'fields': ('sender_url', 'phone_number', 'network', 'reference_number')
+        }),
+        ('Pricing', {
+            'fields': ('exchange_rate_url', 'service_fee_url', 'amount_ghs', 'charge_usd')
+        }),
+        ('State', {
+            'fields': ('state', 'comments', 'initialized_at', 'paid_at',
+                       'processed_at', 'cancelled_at', 'invalidated_at')
+        })
+    )
+
+    list_display = ('id', 'sender_email', 'reference_number', 'state')
+
+    list_filter = ('state',)
+
+    search_fields = ('id', 'reference_number')
+
+    list_per_page = 15
+
+admin.site.register(AirtimeTopup, AirtimeTopupAdmin)
