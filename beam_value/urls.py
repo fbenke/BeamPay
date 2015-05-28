@@ -39,6 +39,10 @@ urlpatterns = patterns(
         include('pricing.urls', namespace='pricing')
     ),
     url(
+        r'^api/v1/payment/',
+        include('payment.urls', namespace='payment')
+    ),
+    url(
         r'^api/v1/transaction/',
         include('transaction.urls', namespace='transaction')
     ),

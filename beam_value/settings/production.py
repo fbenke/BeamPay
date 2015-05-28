@@ -47,6 +47,7 @@ THIRD_PARTY_APPS = (
 LOCAL_APPS = (
     'beam_value',
     'account',
+    'payment',
     'pricing',
     'transaction',
     'recipient'
@@ -287,6 +288,8 @@ MAIL_AITRIME_TOPUP_COMPLETE_SUBJECT = 'emails/airtime_topup_complete_subject.txt
 MAIL_AITRIME_TOPUP_COMPLETE_TEXT = 'emails/airtime_topup_complete_message.txt'
 MAIL_AITRIME_TOPUP_COMPLETE_HTML = 'emails/airtime_topup_complete_message.html'
 
+MAIL_NOTIFY_ADMIN_PAID_SUBJECT = 'emails/airtime_topup_paid_subject.txt'
+MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/airtime_topup_paid_message.txt'
 
 # User-Facing URLs in Email templates
 MAIL_ACTIVATION_URL = '#!/auth/activate/{}/'
@@ -311,3 +314,9 @@ TOR_BLOCKING = False
 TOR_TIMEOUT = 5
 
 GEOIP_PATH = BASE_DIR('static', 'geo_data', 'GeoIP.dat')
+
+
+# ==================== Payment Processors ====================
+
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')

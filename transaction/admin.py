@@ -64,18 +64,21 @@ class TransactionAdmin(admin.ModelAdmin):
     recipient_name.short_description = 'recipient name'
 
     readonly_fields = (
-        'sender_url', 'recipient_url', 'exchange_rate_url', 'transaction_type',
-        'reference_number', 'last_changed', 'additional_info'
+        'id', 'sender_url', 'recipient_url', 'exchange_rate_url', 'transaction_type',
+        'reference_number', 'last_changed', 'additional_info', 'charge_usd'
     )
 
     fieldsets = (
         (None, {
-            'fields': ('sender_url', 'recipient_url', 'transaction_type', 'reference_number',
-                       'state', 'additional_info', 'last_changed')
+            'fields': ('id', 'sender_url', 'recipient_url', 'transaction_type',
+                       'reference_number', 'state', 'additional_info', 'last_changed')
         }),
         ('Pricing', {
             'fields': ('exchange_rate_url', 'cost_of_delivery_usd',
-                       'cost_of_delivery_ghs', 'service_charge')
+                       'cost_of_delivery_ghs', 'service_charge', 'charge_usd')
+        }),
+        ('Payments', {
+            'fields': ('payment_processor', 'payment_reference')
         })
     )
 
@@ -99,10 +102,10 @@ class TransactionAdmin(admin.ModelAdmin):
                 comment=getattr(obj, 'state')
             )
 
-        if 'cost_of_delivery_ghs' in form.changed_data:
+        if 'cost_of_delivery_ghs' in form.changed_data and getattr(obj, 'cost_of_delivery_ghs'):
             obj.cost_of_delivery_usd = getattr(obj, 'cost_of_delivery_ghs') / obj.exchange_rate.usd_ghs
 
-        elif 'cost_of_delivery_usd' in form.changed_data:
+        elif 'cost_of_delivery_usd' in form.changed_data and getattr(obj, 'cost_of_delivery_usd'):
             obj.cost_of_delivery_ghs = getattr(obj, 'cost_of_delivery_usd') * obj.exchange_rate.usd_ghs
 
         obj.save()
@@ -156,7 +159,7 @@ class AirtimeTopupAdmin(admin.ModelAdmin):
         'id', 'sender_url', 'exchange_rate_url', 'service_fee_url',
         'phone_number', 'network', 'amount_ghs', 'reference_number',
         'initialized_at', 'paid_at', 'processed_at', 'cancelled_at',
-        'invalidated_at', 'charge_usd'
+        'invalidated_at', 'charge_usd', 'payment_processor', 'payment_reference'
     )
 
     fieldsets = (
@@ -165,6 +168,9 @@ class AirtimeTopupAdmin(admin.ModelAdmin):
         }),
         ('Pricing', {
             'fields': ('exchange_rate_url', 'service_fee_url', 'amount_ghs', 'charge_usd')
+        }),
+        ('Payments', {
+            'fields': ('payment_processor', 'payment_reference')
         }),
         ('State', {
             'fields': ('state', 'initialized_at', 'paid_at', 'processed_at',
