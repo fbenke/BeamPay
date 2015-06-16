@@ -292,9 +292,9 @@ MAIL_NOTIFY_ADMIN_PAID_SUBJECT = 'emails/airtime_topup_paid_subject.txt'
 MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/airtime_topup_paid_message.txt'
 
 # User-Facing URLs in Email templates
-MAIL_ACTIVATION_URL = '#!/auth/activate/{}/'
-MAIL_EMAIL_CHANGE_CONFIRM_URL = '#!/auth/settings/email/{}/'
-MAIL_PASSWORD_RESET_URL = '#!/auth/forgot/{}-{}/'
+MAIL_ACTIVATION_URL = '#/auth/activate/{}/'
+MAIL_EMAIL_CHANGE_CONFIRM_URL = '#/auth/settings/email/{}/'
+MAIL_PASSWORD_RESET_URL = '#/auth/forgot/{}-{}/'
 
 # ==================== IP-based blocking ====================
 
