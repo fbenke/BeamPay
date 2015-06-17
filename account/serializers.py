@@ -180,6 +180,13 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         fields = read_only_fields + read_and_write_fields
 
+    # hack to avaid error when rendering None value for country field
+    def to_representation(self, obj):
+        data = super(ProfileSerializer, self).to_representation(obj)
+        if data['country'] == '':
+            data['country'] = ''
+        return data
+
 
 class UserSerializer(serializers.ModelSerializer):
 
