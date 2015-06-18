@@ -93,7 +93,7 @@ class CreateAirtimeTopup(GenericAPIView):
         if (get_current_exchange_rate().id != exchange_rate_id or
                 get_current_airtime_fee().id != airtime_fee_id):
             return Response(
-                {'detail': constants.EXCHANGE_RATE_EXPIRED},
+                {'detail': constants.PRICING_EXPIRED},
                 status=status.HTTP_400_BAD_REQUEST
             )
         try:

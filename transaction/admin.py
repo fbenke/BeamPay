@@ -133,6 +133,16 @@ class AirtimeTopupAdmin(admin.ModelAdmin):
     sender_url.allow_tags = True
     sender_url.short_description = 'sender'
 
+    def recipient_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/recipient/recipient'
+        return '<a href="{}/{}/">{} {} ({})</a>'.format(
+            path, obj.recipient.id, obj.recipient.first_name,
+            obj.recipient.last_name, obj.recipient.id
+        )
+
+    recipient_url.allow_tags = True
+    recipient_url.short_description = 'recipient'
+
     def exchange_rate_url(self, obj):
         path = settings.API_BASE_URL + 'admin/pricing/exchangerate'
         return '<a href="{}/{}/">{}</a>'.format(
@@ -157,14 +167,14 @@ class AirtimeTopupAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         'id', 'sender_url', 'exchange_rate_url', 'service_fee_url',
-        'phone_number', 'network', 'amount_ghs', 'reference_number',
-        'initialized_at', 'paid_at', 'processed_at', 'cancelled_at',
-        'invalidated_at', 'charge_usd', 'payment_processor', 'payment_reference'
+        'network', 'amount_ghs', 'reference_number', 'initialized_at',
+        'paid_at', 'processed_at', 'cancelled_at', 'invalidated_at',
+        'charge_usd', 'payment_processor', 'payment_reference', 'recipient_url'
     )
 
     fieldsets = (
         (None, {
-            'fields': ('sender_url', 'phone_number', 'network', 'reference_number')
+            'fields': ('sender_url', 'network', 'reference_number', 'recipient_url')
         }),
         ('Pricing', {
             'fields': ('exchange_rate_url', 'service_fee_url', 'amount_ghs', 'charge_usd')

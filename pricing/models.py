@@ -8,9 +8,11 @@ from beam_value.utils.log import log_error
 def get_current_object(cls):
     try:
         return cls.objects.get(end__isnull=True)
+
     except ObjectDoesNotExist:
-        log_error('ERROR {} - No pricing object found.'.format(cls))
-        raise ObjectDoesNotExist
+        msg = 'ERROR {} - No pricing object found.'.format(cls)
+        log_error(msg)
+        raise ObjectDoesNotExist(msg)
 
 
 def end_previous_object(cls):
@@ -20,8 +22,9 @@ def end_previous_object(cls):
         previous_object.save()
     except ObjectDoesNotExist:
         if cls.objects.all().exists():
-            log_error('ERROR {} - Failed to end previous pricing.'.format(cls))
-            raise ObjectDoesNotExist
+            msg = 'ERROR {} - Failed to end previous pricing.'.format(cls)
+            log_error(msg)
+            raise ObjectDoesNotExist(msg)
 
 
 def get_current_exchange_rate():

@@ -13,6 +13,7 @@ class BeamProfile(UserenaBaseProfile):
     PHONE = 'PHON'
     EMAIL = 'MAIL'
     SMS = 'SMS'
+    WHATSAPP = 'WAP'
 
     CONTACT_METHODS = (PHONE, EMAIL, SMS)
 
@@ -20,6 +21,7 @@ class BeamProfile(UserenaBaseProfile):
         (PHONE, 'phone call'),
         (EMAIL, 'email'),
         (SMS, 'sms'),
+        (WHATSAPP, 'whatsapp')
     )
 
     user = models.OneToOneField(

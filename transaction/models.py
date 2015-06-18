@@ -19,11 +19,13 @@ class AirtimeTopup(models.Model):
     VODAFONE = 'VOD'
     AIRTEL = 'AIR'
     MTN = 'MTN'
+    TIGO = 'TIG'
 
     NETWORK_CHOICES = (
         (VODAFONE, 'Vodafone'),
         (AIRTEL, 'Airtel'),
-        (MTN, 'MTN')
+        (MTN, 'MTN'),
+        (TIGO, 'Tigo')
     )
 
     INIT = 'INIT'
@@ -52,6 +54,12 @@ class AirtimeTopup(models.Model):
         help_text='Sender associated with that topup'
     )
 
+    recipient = models.ForeignKey(
+        Recipient,
+        related_name='airtime_topups',
+        help_text='Recipient associated with that transaction'
+    )
+
     exchange_rate = models.ForeignKey(
         ExchangeRate,
         related_name='airtime_topup',
@@ -62,12 +70,6 @@ class AirtimeTopup(models.Model):
         AirtimeServiceFee,
         related_name='airtime_topup',
         help_text='Service fee applied to this topup'
-    )
-
-    phone_number = models.CharField(
-        'Mobile Money Phone Number',
-        max_length=15,
-        help_text='Phone number of recipient'
     )
 
     network = models.CharField(

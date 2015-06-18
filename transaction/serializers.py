@@ -102,9 +102,12 @@ class CreateTransactionSerializer(serializers.ModelSerializer):
 
 class CreateAirtimeTopupSerializer(serializers.ModelSerializer):
 
+    recipient = RecipientSerializer(many=False, required=False)
+    recipient_id = serializers.IntegerField(required=False)
+
     class Meta:
         model = models.AirtimeTopup
-        fields = ('phone_number', 'network', 'amount_ghs')
+        fields = ('recipient', 'recipient_id', 'network', 'amount_ghs')
 
     def create(self, validated_data):
 
@@ -113,10 +116,24 @@ class CreateAirtimeTopupSerializer(serializers.ModelSerializer):
         exchange_rate = get_current_exchange_rate()
         airtime_fee = get_current_airtime_fee()
 
+        if validated_data.get('recipient', None):
+            recipient_data = validated_data.pop('recipient')
+            recipient = Recipient.objects.create(user=user, **recipient_data)
+
+        elif validated_data.get('recipient_id', None):
+
+            try:
+                recipient_id = validated_data.pop('recipient_id')
+                recipient = Recipient.objects.get(user__id=user.id, id=recipient_id)
+
+            except ObjectDoesNotExist:
+                raise APIException(constants.INVALID_PARAMETERS)
+
         airtime_topup = models.AirtimeTopup.objects.create(
             sender=user,
             exchange_rate=exchange_rate,
             service_fee=airtime_fee,
+            recipient=recipient,
             **validated_data
         )
 
