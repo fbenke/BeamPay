@@ -17,8 +17,19 @@ class RecipientAdmin(admin.ModelAdmin):
         'user_url', 'id', 'first_name', 'last_name', 'phone_number',
         'email', 'date_of_birth', 'relation'
     )
-    read_and_write_fields = ()
-    fields = readonly_fields + read_and_write_fields
+
     list_display = ('id', 'first_name', 'last_name', 'phone_number')
+
+    fieldsets = (
+        (None, {
+            'fields': ('user_url', 'id', 'first_name', 'last_name',
+                       'phone_number', 'email')
+        }),
+        ('Reserved for Later', {
+            'classes': ('collapse', ),
+            'fields': ('date_of_birth', 'relation')
+        })
+    )
+
 
 admin.site.register(Recipient, RecipientAdmin)
