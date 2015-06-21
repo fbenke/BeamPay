@@ -8,15 +8,16 @@ from beam_value.utils.ip_analysis import country_blocked, is_tor_node,\
     HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS
 from beam_value.utils.exceptions import APIException
 
-from transaction import serializers
-from transaction import constants
+from account.utils import AccountException
 
 from pricing.models import get_current_exchange_rate, get_current_airtime_fee
 
+from transaction import serializers
+from transaction import constants
 
-class CreateValetTransaction(GenericAPIView):
 
-    serializer_class = serializers.CreateValetSerializer
+class CreateGenericTransaction(GenericAPIView):
+
     permission_classes = (IsAuthenticated, IsNoAdmin)
 
     def post(self, request):
@@ -29,82 +30,64 @@ class CreateValetTransaction(GenericAPIView):
 
         try:
 
-            if serializer.is_valid():
+            self.check_parameters(request)
 
-                # basic profile information incomplete
-                if not request.user.profile.information_complete:
-                    return Response(
-                        {'detail': constants.PROFILE_INCOMPLETE},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+            if serializer.is_valid():
 
                 transaction = serializer.save(user=request.user)
 
                 return Response(
-                    {'reference_number': transaction.reference_number},
-                    status=status.HTTP_201_CREATED)
+                    self.generate_response(transaction),
+                    status=status.HTTP_201_CREATED
+                )
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except APIException as e:
+        except (AccountException, APIException) as e:
 
             return Response(
-                {'detail': e[0]}, status=status.HTTP_400_BAD_REQUEST)
+                {'detail': e[0]},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def check_parameters(self, request):
+
+        # check if basic profile information incomplete
+        if not request.user.profile.information_complete:
+            raise AccountException(constants.PROFILE_INCOMPLETE)
+
+    def generate_response(self, transaction):
+        return {'reference_number': transaction.reference_number}
 
 
-class CreateAirtimeTopup(GenericAPIView):
+class CreateValetTransaction(CreateGenericTransaction):
+
+    serializer_class = serializers.CreateValetSerializer
+
+
+class CreateAirtimeTopup(CreateGenericTransaction):
 
     serializer_class = serializers.CreateAirtimeTopupSerializer
-    permission_classes = (IsAuthenticated, IsNoAdmin)
 
-    def post(self, request):
+    def check_parameters(self, request):
 
-        # block countries we are not licensed to operate in and tor clients
-        if country_blocked(request) or is_tor_node(request):
-            return Response(status=HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS)
-
-        serializer = self.serializer_class(data=request.data)
+        super(CreateAirtimeTopup, self).check_parameters(request)
 
         # check if Exchange Rate or Airtime Fee has expired
         exchange_rate_id = request.data.get('exchange_rate_id', None)
         airtime_fee_id = request.data.get('airtime_fee_id', None)
 
         if not exchange_rate_id or not airtime_fee_id:
-            return Response(
-                {'detail': constants.INVALID_PARAMETERS},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise APIException(constants.INVALID_PARAMETERS)
 
         if (get_current_exchange_rate().id != exchange_rate_id or
                 get_current_airtime_fee().id != airtime_fee_id):
-            return Response(
-                {'detail': constants.PRICING_EXPIRED},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        try:
+            raise APIException(constants.PRICING_EXPIRED)
 
-            if serializer.is_valid():
-
-                # basic profile information incomplete
-                if not request.user.profile.information_complete:
-                    return Response(
-                        {'detail': constants.PROFILE_INCOMPLETE},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                airtime_topup = serializer.save(user=request.user)
-
-                return Response(
-                    {'reference_number': airtime_topup.reference_number,
-                     'charge_usd': airtime_topup.total_charge_usd},
-                    status=status.HTTP_201_CREATED)
-
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except APIException as e:
-
-            return Response(
-                {'detail': e[0]}, status=status.HTTP_400_BAD_REQUEST)
+    def generate_response(self, transaction):
+        response_dict = super(CreateAirtimeTopup, self).generate_response(transaction)
+        response_dict['charge_usd'] = transaction.total_charge_usd
+        return response_dict
 
 
 # class ViewTransactions(ListAPIView):
