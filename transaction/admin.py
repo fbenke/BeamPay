@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.contrib import admin
-from django.utils import timezone
+from django.contrib.contenttypes.admin import GenericTabularInline
 
-from transaction.forms import CommentInlineFormset, TransactionModelForm
-from transaction.models import Transaction, Comment, AirtimeTopup
+from transaction.forms import CommentInlineFormset
+from transaction.models import Comment, AirtimeTopup
+from transaction import constants as c
 
 
-class CommentInline(admin.TabularInline):
+class CommentInline(GenericTabularInline):
 
     model = Comment
     readonly_fields = ('author', 'timestamp')
@@ -21,9 +22,10 @@ class CommentInline(admin.TabularInline):
         return formset
 
 
-class TransactionAdmin(admin.ModelAdmin):
+class GenericTransactionAdmin(admin.ModelAdmin):
 
-    form = TransactionModelForm
+    class Meta:
+        abstract = True
 
     def sender_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
@@ -32,6 +34,18 @@ class TransactionAdmin(admin.ModelAdmin):
 
     sender_url.allow_tags = True
     sender_url.short_description = 'sender'
+
+    def sender_email(self, obj):
+        return obj.sender.email
+
+    sender_email.allow_tags = True
+    sender_email.short_description = 'sender'
+
+    def recipient_name(self, obj):
+        return '{} {}'.format(obj.recipient.first_name, obj.recipient.last_name)
+
+    recipient_name.allow_tags = True
+    recipient_name.short_description = 'recipient'
 
     def recipient_url(self, obj):
         path = settings.API_BASE_URL + 'admin/recipient/recipient'
@@ -51,39 +65,15 @@ class TransactionAdmin(admin.ModelAdmin):
     exchange_rate_url.allow_tags = True
     exchange_rate_url.short_description = 'exchange rate'
 
-    def sender_email(self, obj):
-        return obj.sender.email
+    def charge_usd(self, obj):
+        return obj.charge_usd
 
-    sender_email.allow_tags = True
-    sender_email.short_description = 'sender email'
+    charge_usd.allow_tags = True
+    charge_usd.short_description = 'charge in usd'
 
-    def recipient_name(self, obj):
-        return '{} {}'.format(obj.recipient.first_name, obj.recipient.last_name)
-
-    recipient_name.allow_tags = True
-    recipient_name.short_description = 'recipient name'
-
-    readonly_fields = (
-        'id', 'sender_url', 'recipient_url', 'exchange_rate_url', 'transaction_type',
-        'reference_number', 'last_changed', 'additional_info', 'charge_usd'
-    )
-
-    fieldsets = (
-        (None, {
-            'fields': ('id', 'sender_url', 'recipient_url', 'transaction_type',
-                       'reference_number', 'state', 'additional_info', 'last_changed')
-        }),
-        ('Pricing', {
-            'fields': ('exchange_rate_url', 'cost_of_delivery_usd',
-                       'cost_of_delivery_ghs', 'service_charge', 'charge_usd')
-        }),
-        ('Payments', {
-            'fields': ('payment_processor', 'payment_reference')
-        })
-    )
-
+    #  default settings
     list_display = (
-        'id', 'sender_email', 'recipient_name', 'transaction_type', 'reference_number', 'state'
+        'id', 'sender_email', 'recipient_name', 'reference_number', 'state'
     )
 
     list_filter = ('state',)
@@ -94,118 +84,69 @@ class TransactionAdmin(admin.ModelAdmin):
 
     inlines = (CommentInline, )
 
-    def save_model(self, request, obj, form, change):
+    readonly_fields = (
+        'id', 'sender_url', 'recipient_url', 'exchange_rate_url',
+        'total_charge_usd', 'reference_number', 'last_changed',
+        'service_charge', 'payment_processor', 'payment_reference'
+    )
 
+    fieldsets = (
+        (None, {
+            'fields': ('id', 'sender_url', 'recipient_url',
+                       'reference_number', 'state', 'last_changed')
+        }),
+        ('Pricing', {
+            'fields': ('exchange_rate_url', 'amount_usd',
+                       'amount_ghs', 'service_charge',
+                       'total_charge_usd')
+        }),
+        ('Payments', {
+            'fields': ('payment_processor', 'payment_reference')
+        })
+    )
+
+    def save_model(self, request, obj, form, change):
         if 'state' in form.changed_data:
             obj.add_status_change(
                 author=request.user,
                 comment=getattr(obj, 'state')
             )
 
-        if 'cost_of_delivery_ghs' in form.changed_data and getattr(obj, 'cost_of_delivery_ghs'):
-            obj.cost_of_delivery_usd = getattr(obj, 'cost_of_delivery_ghs') / obj.exchange_rate.usd_ghs
+        # TODO: check
+        if 'amount_ghs' in form.changed_data and getattr(obj, 'amount_ghs'):
+            obj.amount_usd = getattr(obj, 'amount_ghs') / obj.exchange_rate.usd_ghs
 
-        elif 'cost_of_delivery_usd' in form.changed_data and getattr(obj, 'cost_of_delivery_usd'):
-            obj.cost_of_delivery_ghs = getattr(obj, 'cost_of_delivery_usd') * obj.exchange_rate.usd_ghs
+        elif 'amount_usd' in form.changed_data and getattr(obj, 'amount_usd'):
+            obj.amount_ghs = getattr(obj, 'amount_usd') * obj.exchange_rate.usd_ghs
 
         obj.save()
 
-admin.site.register(Transaction, TransactionAdmin)
 
+class AirtimeTopupAdmin(GenericTransactionAdmin):
 
-class AirtimeTopupAdmin(admin.ModelAdmin):
-
-    STATE_CHANGE_TIMESTAMP_FIELD = {
-        Transaction.PROCESSED: 'processed_at',
-        Transaction.PAID: 'paid_at',
-        Transaction.CANCELLED: 'cancelled_at',
-        Transaction.INVALID: 'invalidated_at'
-    }
-
-    def sender_email(self, obj):
-        return obj.sender.email
-
-    def sender_url(self, obj):
-        path = settings.API_BASE_URL + 'admin/account/beamprofile'
-        return '<a href="{}/{}/">{} {}</a>'.format(
-            path, obj.sender.profile.id, obj.sender.first_name, obj.sender.last_name)
-
-    sender_url.allow_tags = True
-    sender_url.short_description = 'sender'
-
-    def recipient_url(self, obj):
-        path = settings.API_BASE_URL + 'admin/recipient/recipient'
-        return '<a href="{}/{}/">{} {} ({})</a>'.format(
-            path, obj.recipient.id, obj.recipient.first_name,
-            obj.recipient.last_name, obj.recipient.id
-        )
-
-    recipient_url.allow_tags = True
-    recipient_url.short_description = 'recipient'
-
-    def exchange_rate_url(self, obj):
-        path = settings.API_BASE_URL + 'admin/pricing/exchangerate'
-        return '<a href="{}/{}/">{}</a>'.format(
-            path, obj.exchange_rate.id, obj.exchange_rate.usd_ghs)
-
-    exchange_rate_url.allow_tags = True
-    exchange_rate_url.short_description = 'exchange rate'
+    def __init__(self, model, admin_site):
+        super(AirtimeTopupAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ('network', 'service_fee_url',
+                                 'amount_usd', 'amount_ghs')
+        addtl_fieldset = ('network', 'service_fee_url')
+        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
+        addtl_fieldset = ('Airtime', {'fields': addtl_fieldset})
+        self.fieldsets = (self.fieldsets[0], self.fieldsets[1],
+                          addtl_fieldset, self.fieldsets[2])
 
     def service_fee_url(self, obj):
         path = settings.API_BASE_URL + 'admin/pricing/airtimeservicefee'
         return '<a href="{}/{}/">{}</a>'.format(
-            path, obj.service_fee.id, obj.service_fee.fee)
+            path, obj.airtime_service_fee.id, obj.airtime_service_fee.id)
 
     service_fee_url.allow_tags = True
     service_fee_url.short_description = 'service fee'
 
-    def charge_usd(self, obj):
-        return obj.charge_usd
-
-    charge_usd.allow_tags = True
-    charge_usd.short_description = 'charge in usd'
-
-    readonly_fields = (
-        'id', 'sender_url', 'exchange_rate_url', 'service_fee_url',
-        'network', 'amount_ghs', 'reference_number', 'initialized_at',
-        'paid_at', 'processed_at', 'cancelled_at', 'invalidated_at',
-        'charge_usd', 'payment_processor', 'payment_reference', 'recipient_url'
-    )
-
-    fieldsets = (
-        (None, {
-            'fields': ('sender_url', 'network', 'reference_number', 'recipient_url')
-        }),
-        ('Pricing', {
-            'fields': ('exchange_rate_url', 'service_fee_url', 'amount_ghs', 'charge_usd')
-        }),
-        ('Payments', {
-            'fields': ('payment_processor', 'payment_reference')
-        }),
-        ('State', {
-            'fields': ('state', 'initialized_at', 'paid_at', 'processed_at',
-                       'cancelled_at', 'invalidated_at', 'comments')
-        })
-    )
-
-    list_display = ('id', 'sender_email', 'reference_number', 'state')
-
-    list_filter = ('state',)
-
-    search_fields = ('id', 'reference_number')
-
-    list_per_page = 15
-
     def save_model(self, request, obj, form, change):
+        super(AirtimeTopupAdmin, self).save_model(request, obj, form, change)
 
-        if 'state' in form.changed_data:
+        if 'state' in form.changed_data and obj.state == c.PROCESSED:
+            obj.post_processed()
 
-            timestamp_field = self.STATE_CHANGE_TIMESTAMP_FIELD[getattr(obj, 'state')]
-            setattr(obj, timestamp_field, timezone.now())
-
-            if obj.state == Transaction.PROCESSED:
-                obj.post_processed()
-
-        obj.save()
 
 admin.site.register(AirtimeTopup, AirtimeTopupAdmin)

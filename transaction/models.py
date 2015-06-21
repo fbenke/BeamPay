@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
 
@@ -9,79 +11,49 @@ from pricing.models import ExchangeRate, AirtimeServiceFee
 
 from recipient.models import Recipient
 
+from transaction import constants as c
 
-class AirtimeTopup(models.Model):
+
+class AbstractTransaction(models.Model):
 
     class Meta:
-        ordering = ['-initialized_at']
-
-    # Constants
-    VODAFONE = 'VOD'
-    AIRTEL = 'AIR'
-    MTN = 'MTN'
-    TIGO = 'TIG'
-
-    NETWORK_CHOICES = (
-        (VODAFONE, 'Vodafone'),
-        (AIRTEL, 'Airtel'),
-        (MTN, 'MTN'),
-        (TIGO, 'Tigo')
-    )
-
-    INIT = 'INIT'
-    PAID = 'PAID'
-    PROCESSED = 'PROC'
-    CANCELLED = 'CANC'
-    INVALID = 'INVD'
-
-    TRANSACTION_STATES = (
-        (INIT, 'initialized'),
-        (PAID, 'paid'),
-        (PROCESSED, 'processed'),
-        (CANCELLED, 'cancelled'),
-        (INVALID, 'invalid')
-    )
-
-    STRIPE = 'STRP'
+        ordering = ['-last_changed']
+        abstract = True
 
     PAYMENT_PROCESSOR_CHOICES = (
-        (STRIPE, 'stripe'),
+        (c.PAYPAL, 'paypal'),
+        (c.STRIPE, 'stripe'),
+        (c.WEPAY, 'wepay')
+    )
+
+    TRANSACTION_STATES = (
+        (c.INIT, 'initialized'),
+        (c.GATHERING_INFO, 'gatering information'),
+        (c.READY_FOR_PAYMENT, 'ready for payment'),
+        (c.PAID, 'paid'),
+        (c.PROCESSED, 'processed'),
+        (c.CANCELLED, 'cancelled'),
+        (c.INVALID, 'invalid')
     )
 
     sender = models.ForeignKey(
         User,
-        related_name='artime_topups',
-        help_text='Sender associated with that topup'
+        related_name='%(app_label)s_%(class)s',
+        help_text='Sender associated with that transaction'
     )
 
     recipient = models.ForeignKey(
         Recipient,
-        related_name='airtime_topups',
+        related_name='%(app_label)s_%(class)s',
         help_text='Recipient associated with that transaction'
     )
 
-    exchange_rate = models.ForeignKey(
-        ExchangeRate,
-        related_name='airtime_topup',
-        help_text='Exchange rate applied to this topup'
-    )
-
-    service_fee = models.ForeignKey(
-        AirtimeServiceFee,
-        related_name='airtime_topup',
-        help_text='Service fee applied to this topup'
-    )
-
-    network = models.CharField(
-        'Network',
+    state = models.CharField(
+        'State',
         max_length=4,
-        choices=NETWORK_CHOICES,
-        help_text='Phone Network'
-    )
-
-    amount_ghs = models.FloatField(
-        'Amount in GHS',
-        help_text='Topup amount in GHS.'
+        choices=TRANSACTION_STATES,
+        default=c.INIT,
+        help_text='State of the transaction.'
     )
 
     reference_number = models.CharField(
@@ -91,52 +63,34 @@ class AirtimeTopup(models.Model):
                   'to transaction in case of problems'
     )
 
-    comments = models.TextField(
-        'Comments',
+    exchange_rate = models.ForeignKey(
+        ExchangeRate,
+        related_name='%(app_label)s_%(class)s',
+        help_text='Exchange rate applied to this transaction',
+        null=True
+    )
+
+    service_charge = models.FloatField(
+        'Service charge in USD',
         blank=True,
-        help_text='Leave comments when manually solving problems with this transaction'
-    )
-
-    state = models.CharField(
-        'State',
-        max_length=4,
-        choices=TRANSACTION_STATES,
-        default=INIT,
-        help_text='State of the transaction.'
-    )
-
-    initialized_at = models.DateTimeField(
-        'Initialized at',
-        auto_now_add=True,
-        help_text='Time at which transaction was created by sender'
-    )
-
-    paid_at = models.DateTimeField(
-        'Paid at',
         null=True,
-        blank=True,
-        help_text='Time at which payment was confirmed with payment gateway'
+        help_text='Service charge of the transaction in USD'
     )
 
-    processed_at = models.DateTimeField(
-        'Processed at',
-        null=True,
+    amount_usd = models.FloatField(
+        'Cost of transaction in USD',
         blank=True,
-        help_text='Time at which equivalent amount was sent to customer'
+        null=True,
+        help_text='Cost of the transaction in USD.\
+        This could be the cost of the service or product we pay for\
+        on behalf of the sender.'
     )
 
-    cancelled_at = models.DateTimeField(
-        'Cancelled at',
-        null=True,
+    amount_ghs = models.FloatField(
+        'Cost of transaction in GHS',
         blank=True,
-        help_text='Time at which the transaction was cancelled and rolled back'
-    )
-
-    invalidated_at = models.DateTimeField(
-        'Invalidated at',
         null=True,
-        blank=True,
-        help_text='Time at which payment was set invalid'
+        help_text='Cost of the transaction in GHS.'
     )
 
     payment_processor = models.CharField(
@@ -151,16 +105,62 @@ class AirtimeTopup(models.Model):
         'Payment Reference',
         max_length=50,
         blank=True,
-        help_text='Reference generated by payment Processor'
+        help_text='Reference generated by payment processor'
     )
 
+    last_changed = models.DateTimeField(
+        'Last changed',
+        auto_now_add=True,
+        help_text='Last changed'
+    )
+
+    def save(self, *args, **kwargs):
+        self.last_changed = timezone.now()
+        super(AbstractTransaction, self).save(*args, **kwargs)
+
+    def add_status_change(self, comment, author='user'):
+        ctype = ContentType.objects.get_for_model(self)
+
+        comment = Comment(
+            content_type=ctype,
+            object_id=self.id,
+            author=author,
+            comment=comment
+        )
+
+        comment.save()
+
     @property
-    def charge_usd(self):
+    def total_charge_usd(self):
         try:
-            return self.service_fee.fee + self.amount_ghs / self.exchange_rate.usd_ghs
+            return self.amount_usd + self.service_charge
         except TypeError:
             return None
 
+
+class AirtimeTopup(AbstractTransaction):
+
+    NETWORK_CHOICES = (
+        (c.VODAFONE, 'Vodafone'),
+        (c.AIRTEL, 'Airtel'),
+        (c.MTN, 'MTN'),
+        (c.TIGO, 'Tigo')
+    )
+
+    network = models.CharField(
+        'Network',
+        max_length=4,
+        choices=NETWORK_CHOICES,
+        help_text='Phone Network'
+    )
+
+    airtime_service_fee = models.ForeignKey(
+        AirtimeServiceFee,
+        related_name='airtime_topup',
+        help_text='Service fee applied to this topup'
+    )
+
+    # TODO: revisit
     def post_paid(self):
 
         mails.send_mail(
@@ -174,12 +174,13 @@ class AirtimeTopup(models.Model):
             to_email=mails.get_admin_mail_addresses()
         )
 
+    # TODO: revisit
     def post_processed(self):
 
         context = {
             'first_name': self.sender.first_name,
-            'amount_ghs': self.amount_ghs,
-            'phone_number': self.phone_number,
+            'amount_ghs': self.cost_of_transaction_ghs,
+            'phone_number': self.recipient.phone_number,
         }
 
         mails.send_mail(
@@ -192,168 +193,14 @@ class AirtimeTopup(models.Model):
         )
 
 
-class Transaction(models.Model):
+class ValetTransaction(AbstractTransaction):
 
-    class Meta:
-        ordering = ['-last_changed']
-
-    # Constants
-    INIT = 'INIT'
-    GATHERING_INFO = 'INFO'
-    READY_FOR_PAYMENT = 'REDY'
-    PAID = 'PAID'
-    PROCESSED = 'PROC'
-    CANCELLED = 'CANC'
-    INVALID = 'INVD'
-
-    TRANSACTION_STATES = (
-        (INIT, 'initialized'),
-        (GATHERING_INFO, 'gatering information'),
-        (READY_FOR_PAYMENT, 'ready for payment'),
-        (PAID, 'paid'),
-        # Fulfillment completed by Beam
-        (PROCESSED, 'processed'),
-        # Could not be completed
-        (CANCELLED, 'cancelled'),
-        # Error during payment
-        (INVALID, 'invalid')
-    )
-
-    UTILITY_BILL = 'UTIL'
-    GIFT = 'GIFT'
-    SCHOOL_FEE = 'SCHL'
-    HOSPITAL_BILL = 'HOSP'
-    INTERNET = 'INTR'
-    ERRAND = 'ERRD'
-    OTHER = 'OTHR'
-
-    TRANSACTION_TYPES = (
-        (UTILITY_BILL, 'utility bill'),
-        (GIFT, 'gift'),
-        (SCHOOL_FEE, 'school fee'),
-        (HOSPITAL_BILL, 'hospital bill'),
-        (INTERNET, 'internet'),
-        (ERRAND, 'errand'),
-        (OTHER, 'other')
-    )
-
-    PAYPAL = 'PAYP'
-    STRIPE = 'STRP'
-
-    PAYMENT_PROCESSOR_CHOICES = (
-        (PAYPAL, 'paypal'),
-        (STRIPE, 'stripe')
-    )
-
-    sender = models.ForeignKey(
-        User,
-        related_name='transactions',
-        help_text='Sender associated with that transaction'
-    )
-
-    recipient = models.ForeignKey(
-        Recipient,
-        related_name='transactions',
-        help_text='Recipient associated with that transaction'
-    )
-
-    transaction_type = models.CharField(
-        'Type',
-        max_length=4,
-        choices=TRANSACTION_TYPES,
-        default=OTHER,
-        help_text='Categorization of service'
-    )
-
-    additional_info = models.CharField(
-        'Additional Information',
+    description = models.CharField(
+        'Description',
         max_length=500,
         blank=True,
-        help_text='Additional Information provided by user'
+        help_text='Description of the valet request'
     )
-
-    exchange_rate = models.ForeignKey(
-        ExchangeRate,
-        related_name='transaction',
-        help_text='Exchange Rates applied to this transaction'
-    )
-
-    cost_of_delivery_usd = models.FloatField(
-        'Cost of Delivery in USD',
-        blank=True,
-        null=True,
-        help_text='Cost of the transaction in USD.'
-    )
-
-    cost_of_delivery_ghs = models.FloatField(
-        'Cost of Delivery in GHS',
-        blank=True,
-        null=True,
-        help_text='Cost of the transaction in GHS.'
-    )
-
-    service_charge = models.FloatField(
-        'Service Charge in USD',
-        blank=True,
-        null=True,
-        help_text='Service Charge of the transaction in USD'
-    )
-
-    reference_number = models.CharField(
-        'Reference Number',
-        max_length=6,
-        help_text='6-digit reference number given to the customer to refer ' +
-                  'to transaction in case of problems'
-    )
-
-    state = models.CharField(
-        'State',
-        max_length=4,
-        choices=TRANSACTION_STATES,
-        default=INIT,
-        help_text='State of the transaction.'
-    )
-
-    last_changed = models.DateTimeField(
-        'Last changed',
-        auto_now_add=True,
-        help_text='Last changed'
-    )
-
-    payment_processor = models.CharField(
-        'Payment Processor',
-        max_length=4,
-        blank=True,
-        choices=PAYMENT_PROCESSOR_CHOICES,
-        help_text='Payment Processor used'
-    )
-
-    payment_reference = models.CharField(
-        'Payment Reference',
-        max_length=50,
-        blank=True,
-        help_text='Reference generated by payment Processor'
-    )
-
-    def add_status_change(self, comment, author='user'):
-        comment = Comment(
-            transaction=self,
-            author=author,
-            comment=comment
-        )
-
-        comment.save()
-
-    def save(self, *args, **kwargs):
-        self.last_changed = timezone.now()
-        super(Transaction, self).save(*args, **kwargs)
-
-    @property
-    def charge_usd(self):
-        try:
-            return self.cost_of_delivery_usd + self.service_charge
-        except TypeError:
-            return None
 
 
 class Comment(models.Model):
@@ -361,11 +208,9 @@ class Comment(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
-    transaction = models.ForeignKey(
-        Transaction,
-        related_name='comments',
-        help_text='Transaction associated with comment.'
-    )
+    content_type = models.ForeignKey(ContentType)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     author = models.CharField(
         'Author',
