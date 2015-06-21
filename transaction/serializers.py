@@ -13,7 +13,7 @@ from recipient.serializers import RecipientSerializer
 
 from pricing.models import get_current_exchange_rate, get_current_airtime_fee
 
-from account.models import BeamProfile
+from account import constants as c
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -23,21 +23,6 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('timestamp', 'comment')
         fields = read_only_fields
 
-
-# class TransactionSerializer(serializers.ModelSerializer):
-
-#     recipient = RecipientSerializer(many=False)
-#     comments = CommentSerializer(many=True)
-
-#     class Meta:
-#         model = models.Transaction
-#         depth = 1
-#         read_only_fields = (
-#             'id', 'reference_number', 'state', 'last_changed', 'transaction_type',
-#             'additional_info', 'cost_of_delivery_usd', 'cost_of_delivery_ghs',
-#             'service_charge', 'recipient', 'comments'
-#         )
-#         fields = read_only_fields + ()
 
 class GenericTransactionSerializer(serializers.ModelSerializer):
 
@@ -84,7 +69,7 @@ class CreateValetSerializer(GenericTransactionSerializer):
 
         if validated_data.get('preferred_contact_method', None):
 
-            if validated_data.get('preferred_contact_method') not in BeamProfile.CONTACT_METHODS:
+            if validated_data.get('preferred_contact_method') not in c.CONTACT_METHODS:
                 raise APIException(constants.INVALID_PARAMETERS)
 
             user.profile.preferred_contact_method = validated_data.pop(
@@ -134,3 +119,19 @@ class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
         airtime_topup.add_status_change('INIT')
 
         return airtime_topup
+
+
+# class TransactionSerializer(serializers.ModelSerializer):
+
+#     recipient = RecipientSerializer(many=False)
+#     comments = CommentSerializer(many=True)
+
+#     class Meta:
+#         model = models.Transaction
+#         depth = 1
+#         read_only_fields = (
+#             'id', 'reference_number', 'state', 'last_changed', 'transaction_type',
+#             'additional_info', 'cost_of_delivery_usd', 'cost_of_delivery_ghs',
+#             'service_charge', 'recipient', 'comments'
+#         )
+#         fields = read_only_fields + ()

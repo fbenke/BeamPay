@@ -6,22 +6,17 @@ from userena.models import UserenaBaseProfile
 
 from django_countries.fields import CountryField
 
+from account import constants as c
+
 
 class BeamProfile(UserenaBaseProfile):
     ''' represents a sender user profile '''
 
-    PHONE = 'PHON'
-    EMAIL = 'MAIL'
-    SMS = 'SMS'
-    WHATSAPP = 'WAP'
-
-    CONTACT_METHODS = (PHONE, EMAIL, SMS, WHATSAPP)
-
     CONTACT_METHOD_CHOICES = (
-        (PHONE, 'phone call'),
-        (EMAIL, 'email'),
-        (SMS, 'sms'),
-        (WHATSAPP, 'whatsapp')
+        (c.PHONE, 'phone call'),
+        (c.EMAIL, 'email'),
+        (c.SMS, 'sms'),
+        (c.WHATSAPP, 'whatsapp')
     )
 
     user = models.OneToOneField(
@@ -76,7 +71,7 @@ class BeamProfile(UserenaBaseProfile):
         'Preferred Contact Method',
         max_length=4,
         choices=CONTACT_METHOD_CHOICES,
-        default=PHONE,
+        default=c.PHONE,
         help_text='Preferred Contact Method'
     )
 

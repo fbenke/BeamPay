@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 
 from transaction.forms import CommentInlineFormset
-from transaction.models import Comment, AirtimeTopup, ValetTransaction
+from transaction import models
 from transaction import constants as c
 
 from pricing.models import get_current_exchange_rate
@@ -11,7 +11,7 @@ from pricing.models import get_current_exchange_rate
 
 class CommentInline(GenericTabularInline):
 
-    model = Comment
+    model = models.Comment
     readonly_fields = ('author', 'timestamp')
     extra = 1
     max_num = 10
@@ -166,5 +166,20 @@ class ValetAdmin(GenericTransactionAdmin):
         self.fieldsets = (self.fieldsets[0], self.fieldsets[1],
                           addtl_fieldset, self.fieldsets[2])
 
-admin.site.register(AirtimeTopup, AirtimeTopupAdmin)
-admin.site.register(ValetTransaction, ValetAdmin)
+
+class SchoolFeeAdmin(GenericTransactionAdmin):
+    pass
+
+
+class BillPaymentAdmin(GenericTransactionAdmin):
+    pass
+
+
+class GiftAdmin(GenericTransactionAdmin):
+    pass
+
+admin.site.register(models.AirtimeTopup, AirtimeTopupAdmin)
+admin.site.register(models.ValetTransaction, ValetAdmin)
+admin.site.register(models.SchoolFeePayment, SchoolFeeAdmin)
+admin.site.register(models.BillPayment, BillPaymentAdmin)
+admin.site.register(models.Gift, GiftAdmin)

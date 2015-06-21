@@ -202,6 +202,95 @@ class ValetTransaction(AbstractTransaction):
     )
 
 
+class SchoolFeePayment(AbstractTransaction):
+
+    ward_name = models.CharField(
+        'Name of ward or student',
+        max_length=100,
+        blank=True,
+        help_text='Name of ward'
+    )
+
+    school = models.CharField(
+        'Name of school',
+        max_length=100,
+        blank=True,
+        help_text='Name of school or university'
+    )
+
+    additional_info = models.CharField(
+        'Additional information',
+        max_length=500,
+        blank=True,
+        help_text='Anything else required to know about\
+        the payment, e.g. hall, class, student id'
+    )
+
+
+class BillPayment(AbstractTransaction):
+
+    BILL_CHOICES = (
+        (c.EGC_POSTPAID, 'ECG (electricity)'),
+        (c.GWC_WATER, 'GWC (water)'),
+        (c.DSTV, 'DSTv'),
+        (c.GOTV, 'GOTv'),
+        (c.SURFLINE, 'surfline'),
+        (c.VODAFONE_BROADBAND, 'Vodafone broadband')
+    )
+
+    account_number = models.CharField(
+        'Account number',
+        max_length=20,
+        blank=True,
+        help_text='Account number'
+    )
+
+    bill_type = models.CharField(
+        'Type of bill',
+        max_length=3,
+        choices=BILL_CHOICES,
+        help_text='Type of bill'
+    )
+
+
+class Gift(AbstractTransaction):
+
+    GIFT_CHOICES = (
+        (c.CAKE, 'cake'),
+        (c.FLOWERS, 'flowers'),
+        (c.BASKET, 'gift basket'),
+        (c.MISC, 'something else'),
+    )
+
+    bill_type = models.CharField(
+        'Type of gift',
+        max_length=4,
+        choices=GIFT_CHOICES,
+        help_text='Type of gift'
+    )
+
+    delivery_address = models.CharField(
+        'Delivery address',
+        max_length=500,
+        blank=True,
+        help_text='Delivery address'
+    )
+
+    delivery_time = models.DateTimeField(
+        'Delivery date and time',
+        blank=True,
+        help_text='Delivery date and time'
+    )
+
+    additional_info = models.CharField(
+        'Additional information',
+        max_length=500,
+        blank=True,
+        help_text='Anything else we should know, e.g. \
+        occasion, special requests.'
+    )
+
+
 class Comment(models.Model):
 
     class Meta:
