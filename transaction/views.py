@@ -90,6 +90,11 @@ class CreateAirtimeTopup(CreateGenericTransaction):
         return response_dict
 
 
+class CreateSchoolFeePayment(CreateGenericTransaction):
+
+    serializer_class = serializers.CreateSchoolFeeSerializer
+
+
 # class ViewTransactions(ListAPIView):
 
 #     serializer_class = serializers.TransactionSerializer

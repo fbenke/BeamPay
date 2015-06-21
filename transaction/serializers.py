@@ -28,6 +28,7 @@ class GenericTransactionSerializer(serializers.ModelSerializer):
 
     recipient = RecipientSerializer(many=False, required=False)
     recipient_id = serializers.IntegerField(required=False)
+    preferred_contact_method = serializers.CharField(required=False)
 
     def _get_recipient(self, validated_data, user):
 
@@ -49,10 +50,25 @@ class GenericTransactionSerializer(serializers.ModelSerializer):
 
         return recipient
 
+    def _update_contact_method(self, validated_data, user):
+
+        if validated_data.get('preferred_contact_method', None):
+
+            if validated_data.get('preferred_contact_method') not in c.CONTACT_METHODS:
+                raise APIException(constants.INVALID_PARAMETERS)
+
+            user.profile.preferred_contact_method = validated_data.pop(
+                'preferred_contact_method')
+            user.profile.save()
+
+    def _initial_values(self, transaction):
+
+        transaction.reference_number = generate_reference_number()
+        transaction.save()
+        transaction.add_status_change('INIT')
+
 
 class CreateValetSerializer(GenericTransactionSerializer):
-
-    preferred_contact_method = serializers.CharField(required=False)
 
     class Meta:
         model = models.ValetTransaction
@@ -64,29 +80,17 @@ class CreateValetSerializer(GenericTransactionSerializer):
     def create(self, validated_data):
 
         user = validated_data.pop('user')
-
         recipient = self._get_recipient(validated_data, user)
+        self._update_contact_method(validated_data, user)
 
-        if validated_data.get('preferred_contact_method', None):
-
-            if validated_data.get('preferred_contact_method') not in c.CONTACT_METHODS:
-                raise APIException(constants.INVALID_PARAMETERS)
-
-            user.profile.preferred_contact_method = validated_data.pop(
-                'preferred_contact_method')
-            user.profile.save()
-
-        transaction = models.ValetTransaction.objects.create(
+        valet = models.ValetTransaction.objects.create(
             sender=user,
             recipient=recipient,
             **validated_data
         )
 
-        transaction.reference_number = generate_reference_number()
-        transaction.save()
-        transaction.add_status_change('INIT')
-
-        return transaction
+        self._initial_values(valet)
+        return valet
 
 
 class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
@@ -98,11 +102,11 @@ class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
     def create(self, validated_data):
 
         user = validated_data.pop('user')
+        recipient = self._get_recipient(validated_data, user)
+        self._update_contact_method(validated_data, user)
 
         exchange_rate = get_current_exchange_rate()
         airtime_fee = get_current_airtime_fee()
-
-        recipient = self._get_recipient(validated_data, user)
 
         airtime_topup = models.AirtimeTopup.objects.create(
             sender=user,
@@ -113,13 +117,34 @@ class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
             **validated_data
         )
 
-        airtime_topup.reference_number = generate_reference_number()
         airtime_topup.amount_usd = airtime_topup.amount_ghs / exchange_rate.usd_ghs
-        airtime_topup.save()
-        airtime_topup.add_status_change('INIT')
+        self._initial_values(airtime_topup)
 
         return airtime_topup
 
+
+class CreateSchoolFeeSerializer(GenericTransactionSerializer):
+
+    class Meta:
+        model = models.SchoolFeePayment
+        fields = ('recipient', 'recipient_id', 'ward_name',
+                  'school', 'additional_info', 'preferred_contact_method')
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+        recipient = self._get_recipient(validated_data, user)
+        self._update_contact_method(validated_data, user)
+
+        school_fee_payment = models.SchoolFeePayment.objects.create(
+            sender=user,
+            recipient=recipient,
+            **validated_data
+        )
+
+        self._initial_values(school_fee_payment)
+
+        return school_fee_payment
 
 # class TransactionSerializer(serializers.ModelSerializer):
 

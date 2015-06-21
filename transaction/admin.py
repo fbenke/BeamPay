@@ -37,6 +37,12 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     sender_url.allow_tags = True
     sender_url.short_description = 'sender'
 
+    def contact_method(self, obj):
+        return obj.sender.profile.preferred_contact_method
+
+    contact_method.allow_tags = True
+    contact_method.short_description = 'contact via'
+
     def sender_email(self, obj):
         return obj.sender.email
 
@@ -90,12 +96,12 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     readonly_fields = (
         'id', 'sender_url', 'recipient_url', 'exchange_rate_url',
         'total_charge_usd', 'reference_number', 'last_changed',
-        'payment_processor', 'payment_reference'
+        'payment_processor', 'payment_reference', 'contact_method'
     )
 
     fieldsets = (
         (None, {
-            'fields': ('id', 'sender_url', 'recipient_url',
+            'fields': ('id', 'sender_url', 'contact_method', 'recipient_url',
                        'reference_number', 'state', 'last_changed')
         }),
         ('Pricing', {
@@ -168,7 +174,15 @@ class ValetAdmin(GenericTransactionAdmin):
 
 
 class SchoolFeeAdmin(GenericTransactionAdmin):
-    pass
+
+    def __init__(self, model, admin_site):
+        super(SchoolFeeAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ('ward_name', 'school', 'additional_info', )
+        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
+        addtl_fieldset = ('ward_name', 'school', 'additional_info', )
+        addtl_fieldset = ('School Fees', {'fields': addtl_fieldset})
+        self.fieldsets = (self.fieldsets[0], self.fieldsets[1],
+                          addtl_fieldset, self.fieldsets[2])
 
 
 class BillPaymentAdmin(GenericTransactionAdmin):

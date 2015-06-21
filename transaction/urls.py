@@ -13,6 +13,11 @@ urlpatterns = patterns(
         name='add_airtime'
     ),
     url(
+        r'^add/school/$',
+        views.CreateSchoolFeePayment.as_view(),
+        name='add_school_fee'
+    ),
+    url(
         r'^add/valet/$',
         views.CreateValetTransaction.as_view(),
         name='add_valet'
