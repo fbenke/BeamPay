@@ -3,8 +3,10 @@ from django.contrib import admin
 from django.contrib.contenttypes.admin import GenericTabularInline
 
 from transaction.forms import CommentInlineFormset
-from transaction.models import Comment, AirtimeTopup
+from transaction.models import Comment, AirtimeTopup, ValetTransaction
 from transaction import constants as c
+
+from pricing.models import get_current_exchange_rate
 
 
 class CommentInline(GenericTabularInline):
@@ -49,7 +51,7 @@ class GenericTransactionAdmin(admin.ModelAdmin):
 
     def recipient_url(self, obj):
         path = settings.API_BASE_URL + 'admin/recipient/recipient'
-        return '<a href="{}/{}/">{} {} ({})</a>'.format(
+        return '<a href="{}/{}/">{} {} (id:{})</a>'.format(
             path, obj.recipient.id, obj.recipient.first_name,
             obj.recipient.last_name, obj.recipient.id
         )
@@ -59,8 +61,9 @@ class GenericTransactionAdmin(admin.ModelAdmin):
 
     def exchange_rate_url(self, obj):
         path = settings.API_BASE_URL + 'admin/pricing/exchangerate'
-        return '<a href="{}/{}/">{}</a>'.format(
-            path, obj.exchange_rate.id, obj.exchange_rate.usd_ghs)
+        return '<a href="{}/{}/">{} (id:{})</a>'.format(
+            path, obj.exchange_rate.id, obj.exchange_rate.usd_ghs,
+            obj.exchange_rate.id)
 
     exchange_rate_url.allow_tags = True
     exchange_rate_url.short_description = 'exchange rate'
@@ -87,7 +90,7 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     readonly_fields = (
         'id', 'sender_url', 'recipient_url', 'exchange_rate_url',
         'total_charge_usd', 'reference_number', 'last_changed',
-        'service_charge', 'payment_processor', 'payment_reference'
+        'payment_processor', 'payment_reference'
     )
 
     fieldsets = (
@@ -106,6 +109,7 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     )
 
     def save_model(self, request, obj, form, change):
+
         if 'state' in form.changed_data:
             obj.add_status_change(
                 author=request.user,
@@ -114,9 +118,11 @@ class GenericTransactionAdmin(admin.ModelAdmin):
 
         # TODO: check
         if 'amount_ghs' in form.changed_data and getattr(obj, 'amount_ghs'):
+            obj.exchange_rate = get_current_exchange_rate()
             obj.amount_usd = getattr(obj, 'amount_ghs') / obj.exchange_rate.usd_ghs
 
         elif 'amount_usd' in form.changed_data and getattr(obj, 'amount_usd'):
+            obj.exchange_rate = get_current_exchange_rate()
             obj.amount_ghs = getattr(obj, 'amount_usd') * obj.exchange_rate.usd_ghs
 
         obj.save()
@@ -126,7 +132,7 @@ class AirtimeTopupAdmin(GenericTransactionAdmin):
 
     def __init__(self, model, admin_site):
         super(AirtimeTopupAdmin, self).__init__(model, admin_site)
-        addtl_readonly_fields = ('network', 'service_fee_url',
+        addtl_readonly_fields = ('network', 'service_fee_url', 'service_charge',
                                  'amount_usd', 'amount_ghs')
         addtl_fieldset = ('network', 'service_fee_url')
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
@@ -149,4 +155,16 @@ class AirtimeTopupAdmin(GenericTransactionAdmin):
             obj.post_processed()
 
 
+class ValetAdmin(GenericTransactionAdmin):
+
+    def __init__(self, model, admin_site):
+        super(ValetAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ('description', )
+        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
+        addtl_fieldset = ('description', )
+        addtl_fieldset = ('Valet', {'fields': addtl_fieldset})
+        self.fieldsets = (self.fieldsets[0], self.fieldsets[1],
+                          addtl_fieldset, self.fieldsets[2])
+
 admin.site.register(AirtimeTopup, AirtimeTopupAdmin)
+admin.site.register(ValetTransaction, ValetAdmin)

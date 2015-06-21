@@ -15,7 +15,7 @@ class BeamProfile(UserenaBaseProfile):
     SMS = 'SMS'
     WHATSAPP = 'WAP'
 
-    CONTACT_METHODS = (PHONE, EMAIL, SMS)
+    CONTACT_METHODS = (PHONE, EMAIL, SMS, WHATSAPP)
 
     CONTACT_METHOD_CHOICES = (
         (PHONE, 'phone call'),

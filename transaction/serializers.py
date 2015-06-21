@@ -39,82 +39,12 @@ class CommentSerializer(serializers.ModelSerializer):
 #         )
 #         fields = read_only_fields + ()
 
-
-# class CreateTransactionSerializer(serializers.ModelSerializer):
-
-#     recipient = RecipientSerializer(many=False, required=False)
-#     recipient_id = serializers.IntegerField(required=False)
-#     preferred_contact_method = serializers.CharField(required=False)
-
-#     class Meta:
-
-#         model = models.Transaction
-
-#         fields = (
-#             'recipient', 'recipient_id', 'preferred_contact_method',
-#             'transaction_type', 'additional_info'
-#         )
-
-#     def create(self, validated_data):
-
-#         user = validated_data.pop('user')
-
-#         if validated_data.get('preferred_contact_method', None):
-
-#             if validated_data.get('preferred_contact_method') not in BeamProfile.CONTACT_METHOD_CHOICES:
-#                 raise APIException(constants.INVALID_PARAMETERS)
-
-#             user.profile.preferred_contact_method = validated_data.pop('preferred_contact_method')
-#             user.profile.save()
-
-#         exchange_rate = get_current_exchange_rate()
-
-#         if validated_data.get('recipient', None):
-#             recipient_data = validated_data.pop('recipient')
-#             recipient = Recipient.objects.create(user=user, **recipient_data)
-
-#         elif validated_data.get('recipient_id', None):
-
-#             try:
-#                 recipient_id = validated_data.pop('recipient_id')
-#                 recipient = Recipient.objects.get(user__id=user.id, id=recipient_id)
-
-#             except ObjectDoesNotExist:
-#                 raise APIException(constants.INVALID_PARAMETERS)
-
-#         else:
-#             raise APIException(constants.INVALID_PARAMETERS)
-
-#         transaction = models.Transaction.objects.create(
-#             sender=user,
-#             recipient=recipient,
-#             exchange_rate=exchange_rate,
-#             **validated_data
-#         )
-
-#         transaction.reference_number = generate_reference_number()
-#         transaction.save()
-
-#         transaction.add_status_change('INIT')
-
-#         return transaction
-
-
-class CreateAirtimeTopupSerializer(serializers.ModelSerializer):
+class GenericTransactionSerializer(serializers.ModelSerializer):
 
     recipient = RecipientSerializer(many=False, required=False)
     recipient_id = serializers.IntegerField(required=False)
 
-    class Meta:
-        model = models.AirtimeTopup
-        fields = ('recipient', 'recipient_id', 'network', 'amount_ghs')
-
-    def create(self, validated_data):
-
-        user = validated_data.pop('user')
-
-        exchange_rate = get_current_exchange_rate()
-        airtime_fee = get_current_airtime_fee()
+    def _get_recipient(self, validated_data, user):
 
         if validated_data.get('recipient', None):
             recipient_data = validated_data.pop('recipient')
@@ -129,6 +59,66 @@ class CreateAirtimeTopupSerializer(serializers.ModelSerializer):
             except ObjectDoesNotExist:
                 raise APIException(constants.INVALID_PARAMETERS)
 
+        else:
+            raise APIException(constants.INVALID_PARAMETERS)
+
+        return recipient
+
+
+class CreateValetSerializer(GenericTransactionSerializer):
+
+    preferred_contact_method = serializers.CharField(required=False)
+
+    class Meta:
+        model = models.ValetTransaction
+        fields = (
+            'recipient', 'recipient_id', 'description',
+            'preferred_contact_method'
+        )
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+
+        recipient = self._get_recipient(validated_data, user)
+
+        if validated_data.get('preferred_contact_method', None):
+
+            if validated_data.get('preferred_contact_method') not in BeamProfile.CONTACT_METHODS:
+                raise APIException(constants.INVALID_PARAMETERS)
+
+            user.profile.preferred_contact_method = validated_data.pop(
+                'preferred_contact_method')
+            user.profile.save()
+
+        transaction = models.ValetTransaction.objects.create(
+            sender=user,
+            recipient=recipient,
+            **validated_data
+        )
+
+        transaction.reference_number = generate_reference_number()
+        transaction.save()
+        transaction.add_status_change('INIT')
+
+        return transaction
+
+
+class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
+
+    class Meta:
+        model = models.AirtimeTopup
+        fields = ('recipient', 'recipient_id', 'network', 'amount_ghs')
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+
+        exchange_rate = get_current_exchange_rate()
+        airtime_fee = get_current_airtime_fee()
+
+        recipient = self._get_recipient(validated_data, user)
+
         airtime_topup = models.AirtimeTopup.objects.create(
             sender=user,
             exchange_rate=exchange_rate,
@@ -141,5 +131,6 @@ class CreateAirtimeTopupSerializer(serializers.ModelSerializer):
         airtime_topup.reference_number = generate_reference_number()
         airtime_topup.amount_usd = airtime_topup.amount_ghs / exchange_rate.usd_ghs
         airtime_topup.save()
+        airtime_topup.add_status_change('INIT')
 
         return airtime_topup

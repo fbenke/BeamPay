@@ -1,6 +1,6 @@
 Hi {{ first_name }},
 
-Your phone number {{ phone_number }} has just been topped up with {{ amount_ghs }} GHS.
+The phone number {{ phone_number }} has just been topped up with {{ amount_ghs }} GHS.
 
 Sincerely,
 

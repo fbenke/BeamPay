@@ -7,15 +7,15 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    # url(
-    #     r'^add/$',
-    #     views.CreateTransaction.as_view(),
-    #     name='add'
-    # ),
     url(
         r'^add/airtime/$',
         views.CreateAirtimeTopup.as_view(),
-        name='add'
+        name='add_airtime'
+    ),
+    url(
+        r'^add/valet/$',
+        views.CreateValetTransaction.as_view(),
+        name='add_valet'
     ),
     # url(
     #     r'^$',

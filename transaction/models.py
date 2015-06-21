@@ -174,12 +174,11 @@ class AirtimeTopup(AbstractTransaction):
             to_email=mails.get_admin_mail_addresses()
         )
 
-    # TODO: revisit
     def post_processed(self):
 
         context = {
             'first_name': self.sender.first_name,
-            'amount_ghs': self.cost_of_transaction_ghs,
+            'amount_ghs': self.amount_ghs,
             'phone_number': self.recipient.phone_number,
         }
 
