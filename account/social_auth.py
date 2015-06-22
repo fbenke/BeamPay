@@ -1,6 +1,7 @@
 import requests
 
 from django.conf import settings
+from django.contrib.auth.models import User
 
 from social.apps.django_app.utils import psa
 from social.utils import parse_qs
@@ -34,7 +35,17 @@ def auth_by_token(request, backend):
 
     try:
         access_token = response['access_token']
-        return request.backend.do_auth(access_token)
+
+        # check if user has signed up
+        email = request.backend.user_data(access_token).get('email')
+
+        try:
+            User.objects.get(email=email)
+            exists = True
+        except User.DoesNotExist:
+            exists = False
+
+        return exists, request.backend.do_auth(access_token)
 
     except KeyError:
         raise APIException(response['error']['message'])
