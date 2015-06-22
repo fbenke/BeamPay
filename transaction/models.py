@@ -194,7 +194,7 @@ class AirtimeTopup(AbstractTransaction):
 
 class ValetTransaction(AbstractTransaction):
 
-    description = models.CharField(
+    description = models.TextField(
         'Description',
         max_length=500,
         blank=True,
@@ -218,7 +218,7 @@ class SchoolFeePayment(AbstractTransaction):
         help_text='Name of school or university'
     )
 
-    additional_info = models.CharField(
+    additional_info = models.TextField(
         'Additional information',
         max_length=500,
         blank=True,
@@ -262,14 +262,14 @@ class Gift(AbstractTransaction):
         (c.MISC, 'something else'),
     )
 
-    bill_type = models.CharField(
+    gift_type = models.CharField(
         'Type of gift',
         max_length=4,
         choices=GIFT_CHOICES,
         help_text='Type of gift'
     )
 
-    delivery_address = models.CharField(
+    delivery_address = models.TextField(
         'Delivery address',
         max_length=500,
         blank=True,
@@ -282,7 +282,7 @@ class Gift(AbstractTransaction):
         help_text='Delivery date and time'
     )
 
-    additional_info = models.CharField(
+    additional_info = models.TextField(
         'Additional information',
         max_length=500,
         blank=True,

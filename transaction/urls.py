@@ -18,6 +18,11 @@ urlpatterns = patterns(
         name='add_bill'
     ),
     url(
+        r'^add/gift/$',
+        views.CreateGiftOrder.as_view(),
+        name='add_gift'
+    ),
+    url(
         r'^add/school/$',
         views.CreateSchoolFeePayment.as_view(),
         name='add_school_fee'

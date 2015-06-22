@@ -170,6 +170,31 @@ class CreateBillPaymentSerializer(GenericTransactionSerializer):
 
         return bill_payment
 
+
+class CreateGiftOrderSerializer(GenericTransactionSerializer):
+
+    class Meta:
+        model = models.Gift
+        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
+                  'gift_type', 'delivery_address', 'delivery_time', 'additional_info')
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+        recipient = self._get_recipient(validated_data, user)
+        self._update_contact_method(validated_data, user)
+
+        gift_order = models.Gift.objects.create(
+            sender=user,
+            recipient=recipient,
+            **validated_data
+        )
+
+        self._initial_values(gift_order)
+
+        return gift_order
+
+
 # class TransactionSerializer(serializers.ModelSerializer):
 
 #     recipient = RecipientSerializer(many=False)

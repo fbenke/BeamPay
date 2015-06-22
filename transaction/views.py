@@ -100,6 +100,10 @@ class CreateBillPayment(CreateGenericTransaction):
     serializer_class = serializers.CreateBillPaymentSerializer
 
 
+class CreateGiftOrder(CreateGenericTransaction):
+
+    serializer_class = serializers.CreateGiftOrderSerializer
+
 # class ViewTransactions(ListAPIView):
 
 #     serializer_class = serializers.TransactionSerializer

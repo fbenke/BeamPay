@@ -198,7 +198,16 @@ class BillPaymentAdmin(GenericTransactionAdmin):
 
 
 class GiftAdmin(GenericTransactionAdmin):
-    pass
+
+    def __init__(self, model, admin_site):
+        super(GiftAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ()
+        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
+        addtl_fieldset = ('gift_type', 'delivery_address',
+                          'delivery_time', 'additional_info')
+        addtl_fieldset = ('Gift', {'fields': addtl_fieldset})
+        self.fieldsets = (self.fieldsets[0], addtl_fieldset,
+                          self.fieldsets[1], self.fieldsets[2])
 
 admin.site.register(models.AirtimeTopup, AirtimeTopupAdmin)
 admin.site.register(models.ValetTransaction, ValetAdmin)
