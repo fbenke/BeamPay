@@ -68,31 +68,6 @@ class GenericTransactionSerializer(serializers.ModelSerializer):
         transaction.add_status_change('INIT')
 
 
-class CreateValetSerializer(GenericTransactionSerializer):
-
-    class Meta:
-        model = models.ValetTransaction
-        fields = (
-            'recipient', 'recipient_id', 'description',
-            'preferred_contact_method'
-        )
-
-    def create(self, validated_data):
-
-        user = validated_data.pop('user')
-        recipient = self._get_recipient(validated_data, user)
-        self._update_contact_method(validated_data, user)
-
-        valet = models.ValetTransaction.objects.create(
-            sender=user,
-            recipient=recipient,
-            **validated_data
-        )
-
-        self._initial_values(valet)
-        return valet
-
-
 class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
 
     class Meta:
@@ -123,12 +98,37 @@ class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
         return airtime_topup
 
 
+class CreateValetSerializer(GenericTransactionSerializer):
+
+    class Meta:
+        model = models.ValetTransaction
+        fields = (
+            'recipient', 'recipient_id', 'description',
+            'preferred_contact_method'
+        )
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+        recipient = self._get_recipient(validated_data, user)
+        self._update_contact_method(validated_data, user)
+
+        valet = models.ValetTransaction.objects.create(
+            sender=user,
+            recipient=recipient,
+            **validated_data
+        )
+
+        self._initial_values(valet)
+        return valet
+
+
 class CreateSchoolFeeSerializer(GenericTransactionSerializer):
 
     class Meta:
         model = models.SchoolFeePayment
-        fields = ('recipient', 'recipient_id', 'ward_name',
-                  'school', 'additional_info', 'preferred_contact_method')
+        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
+                  'ward_name', 'school', 'additional_info')
 
     def create(self, validated_data):
 
@@ -145,6 +145,30 @@ class CreateSchoolFeeSerializer(GenericTransactionSerializer):
         self._initial_values(school_fee_payment)
 
         return school_fee_payment
+
+
+class CreateBillPaymentSerializer(GenericTransactionSerializer):
+
+    class Meta:
+        model = models.BillPayment
+        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
+                  'account_number', 'bill_type')
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+        recipient = self._get_recipient(validated_data, user)
+        self._update_contact_method(validated_data, user)
+
+        bill_payment = models.BillPayment.objects.create(
+            sender=user,
+            recipient=recipient,
+            **validated_data
+        )
+
+        self._initial_values(bill_payment)
+
+        return bill_payment
 
 # class TransactionSerializer(serializers.ModelSerializer):
 

@@ -60,11 +60,6 @@ class CreateGenericTransaction(GenericAPIView):
         return {'reference_number': transaction.reference_number}
 
 
-class CreateValetTransaction(CreateGenericTransaction):
-
-    serializer_class = serializers.CreateValetSerializer
-
-
 class CreateAirtimeTopup(CreateGenericTransaction):
 
     serializer_class = serializers.CreateAirtimeTopupSerializer
@@ -90,9 +85,19 @@ class CreateAirtimeTopup(CreateGenericTransaction):
         return response_dict
 
 
+class CreateValetTransaction(CreateGenericTransaction):
+
+    serializer_class = serializers.CreateValetSerializer
+
+
 class CreateSchoolFeePayment(CreateGenericTransaction):
 
     serializer_class = serializers.CreateSchoolFeeSerializer
+
+
+class CreateBillPayment(CreateGenericTransaction):
+
+    serializer_class = serializers.CreateBillPaymentSerializer
 
 
 # class ViewTransactions(ListAPIView):

@@ -169,24 +169,32 @@ class ValetAdmin(GenericTransactionAdmin):
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
         addtl_fieldset = ('description', )
         addtl_fieldset = ('Valet', {'fields': addtl_fieldset})
-        self.fieldsets = (self.fieldsets[0], self.fieldsets[1],
-                          addtl_fieldset, self.fieldsets[2])
+        self.fieldsets = (self.fieldsets[0], addtl_fieldset,
+                          self.fieldsets[1], self.fieldsets[2])
 
 
 class SchoolFeeAdmin(GenericTransactionAdmin):
 
     def __init__(self, model, admin_site):
         super(SchoolFeeAdmin, self).__init__(model, admin_site)
-        addtl_readonly_fields = ('ward_name', 'school', 'additional_info', )
+        addtl_readonly_fields = ('ward_name', 'school', 'additional_info')
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
-        addtl_fieldset = ('ward_name', 'school', 'additional_info', )
+        addtl_fieldset = ('ward_name', 'school', 'additional_info')
         addtl_fieldset = ('School Fees', {'fields': addtl_fieldset})
-        self.fieldsets = (self.fieldsets[0], self.fieldsets[1],
-                          addtl_fieldset, self.fieldsets[2])
+        self.fieldsets = (self.fieldsets[0], addtl_fieldset,
+                          self.fieldsets[1], self.fieldsets[2])
 
 
 class BillPaymentAdmin(GenericTransactionAdmin):
-    pass
+
+    def __init__(self, model, admin_site):
+        super(BillPaymentAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ('bill_type', )
+        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
+        addtl_fieldset = ('account_number', 'bill_type')
+        addtl_fieldset = ('Bill', {'fields': addtl_fieldset})
+        self.fieldsets = (self.fieldsets[0], addtl_fieldset,
+                          self.fieldsets[1], self.fieldsets[2])
 
 
 class GiftAdmin(GenericTransactionAdmin):
