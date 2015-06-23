@@ -11,7 +11,7 @@ from transaction.utils import generate_reference_number
 from recipient.models import Recipient
 from recipient.serializers import RecipientSerializer
 
-from pricing.models import get_current_exchange_rate, get_current_airtime_fee
+from pricing.models import get_current_exchange_rate, get_current_service_fee
 
 from account import constants as c
 
@@ -97,14 +97,14 @@ class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
         self._update_contact_method(validated_data, user)
 
         exchange_rate = get_current_exchange_rate()
-        airtime_fee = get_current_airtime_fee()
+        service_fee = get_current_service_fee()
 
         airtime_topup = models.AirtimeTopup.objects.create(
             sender=user,
             exchange_rate=exchange_rate,
-            airtime_service_fee=airtime_fee,
+            service_fee=service_fee,
             recipient=recipient,
-            service_charge=airtime_fee.fee,
+            service_charge=service_fee.fixed_fee,
             **validated_data
         )
 

@@ -147,9 +147,9 @@ class AirtimeTopupAdmin(GenericTransactionAdmin):
                           addtl_fieldset, self.fieldsets[2])
 
     def service_fee_url(self, obj):
-        path = settings.API_BASE_URL + 'admin/pricing/airtimeservicefee'
+        path = settings.API_BASE_URL + 'admin/pricing/servicefee'
         return '<a href="{}/{}/">{}</a>'.format(
-            path, obj.airtime_service_fee.id, obj.airtime_service_fee.id)
+            path, obj.service_fee.id, obj.service_fee.id)
 
     service_fee_url.allow_tags = True
     service_fee_url.short_description = 'service fee'

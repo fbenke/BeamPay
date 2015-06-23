@@ -41,11 +41,11 @@ def auth_by_token(request, backend):
 
         try:
             User.objects.get(email=email)
-            exists = True
+            new_user = False
         except User.DoesNotExist:
-            exists = False
+            new_user = True
 
-        return exists, request.backend.do_auth(access_token)
+        return new_user, request.backend.do_auth(access_token)
 
     except KeyError:
         raise APIException(response['error']['message'])

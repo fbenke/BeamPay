@@ -31,8 +31,8 @@ def get_current_exchange_rate():
     return get_current_object(ExchangeRate)
 
 
-def get_current_airtime_fee():
-    return get_current_object(AirtimeServiceFee)
+def get_current_service_fee():
+    return get_current_object(ServiceFee)
 
 
 class ExchangeRate(models.Model):
@@ -56,7 +56,7 @@ class ExchangeRate(models.Model):
     )
 
 
-class AirtimeServiceFee(models.Model):
+class ServiceFee(models.Model):
 
     start = models.DateTimeField(
         'Start Time',
@@ -71,7 +71,13 @@ class AirtimeServiceFee(models.Model):
         help_text='Time at which pricing ended.'
     )
 
-    fee = models.FloatField(
-        'Service Fee in USD',
+    fixed_fee = models.FloatField(
+        'Service fee in USD',
         help_text='Service fee charged for the airtime topup.'
+    )
+
+    percentual_fee = models.FloatField(
+        'Percentual fee',
+        help_text='Percentual amount to be added as charge.\
+        Value between 0 and 1.'
     )

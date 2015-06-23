@@ -10,7 +10,7 @@ from beam_value.utils.exceptions import APIException
 
 from account.utils import AccountException
 
-from pricing.models import get_current_exchange_rate, get_current_airtime_fee
+from pricing.models import get_current_exchange_rate, get_current_service_fee
 
 from transaction import serializers
 from transaction import constants
@@ -70,13 +70,13 @@ class CreateAirtimeTopup(CreateGenericTransaction):
 
         # check if Exchange Rate or Airtime Fee has expired
         exchange_rate_id = request.data.get('exchange_rate_id', None)
-        airtime_fee_id = request.data.get('airtime_fee_id', None)
+        service_fee_id = request.data.get('service_fee_id', None)
 
-        if not exchange_rate_id or not airtime_fee_id:
+        if not exchange_rate_id or not service_fee_id:
             raise APIException(constants.INVALID_PARAMETERS)
 
         if (get_current_exchange_rate().id != exchange_rate_id or
-                get_current_airtime_fee().id != airtime_fee_id):
+                get_current_service_fee().id != service_fee_id):
             raise APIException(constants.PRICING_EXPIRED)
 
     def generate_response(self, transaction):

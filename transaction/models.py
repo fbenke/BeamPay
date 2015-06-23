@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from beam_value.utils import mails
 
-from pricing.models import ExchangeRate, AirtimeServiceFee
+from pricing.models import ExchangeRate, ServiceFee
 
 from recipient.models import Recipient
 
@@ -154,8 +154,8 @@ class AirtimeTopup(AbstractTransaction):
         help_text='Phone Network'
     )
 
-    airtime_service_fee = models.ForeignKey(
-        AirtimeServiceFee,
+    service_fee = models.ForeignKey(
+        ServiceFee,
         related_name='airtime_topup',
         help_text='Service fee applied to this topup'
     )
@@ -250,6 +250,13 @@ class BillPayment(AbstractTransaction):
         max_length=3,
         choices=BILL_CHOICES,
         help_text='Type of bill'
+    )
+
+    reference = models.CharField(
+        'Optional reference',
+        max_length=20,
+        blank=True,
+        help_text='Reference for bill payment'
     )
 
 

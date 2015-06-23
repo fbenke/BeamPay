@@ -486,13 +486,13 @@ class SigninFacebook(APIView):
         if backend and code and redirect_uri and accepted_privacy_policy:
 
             try:
-                exists, user = auth_by_token(request, backend)
+                new_user, user = auth_by_token(request, backend)
 
                 # active user was created or matched via email
                 if user.is_active:
                     token, created = Token.objects.get_or_create(user=user)
                     return Response(
-                        {'token': token.key, 'id': user.id, 'exists': exists},
+                        {'token': token.key, 'id': user.id, 'new_user': exists},
                         status=status.HTTP_201_CREATED
                     )
 
@@ -511,7 +511,7 @@ class SigninFacebook(APIView):
                     user.save()
                     token, created = Token.objects.get_or_create(user=user)
                     return Response(
-                        {'token': token.key, 'id': user.id, 'exists': exists},
+                        {'token': token.key, 'id': user.id, 'new_user': new_user},
                         status=status.HTTP_201_CREATED
                     )
 
