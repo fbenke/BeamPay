@@ -118,17 +118,24 @@ class CreateAirtimeTopupSerializer(InstantPaymentSerializer):
 
     class Meta:
         model = models.AirtimeTopup
-        fields = ('recipient', 'recipient_id', 'network', 'amount_ghs')
+        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
+                  'network', 'amount_ghs')
+
+
+class CreateBillPaymentSerializer(InstantPaymentSerializer):
+
+    class Meta:
+        model = models.BillPayment
+        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
+                  'account_number', 'bill_type')
 
 
 class CreateValetSerializer(GenericTransactionSerializer):
 
     class Meta:
         model = models.ValetTransaction
-        fields = (
-            'recipient', 'recipient_id', 'preferred_contact_method',
-            'description'
-        )
+        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
+                  'description')
 
 
 class CreateSchoolFeeSerializer(GenericTransactionSerializer):
@@ -137,14 +144,6 @@ class CreateSchoolFeeSerializer(GenericTransactionSerializer):
         model = models.SchoolFeePayment
         fields = ('recipient', 'recipient_id', 'preferred_contact_method',
                   'ward_name', 'school', 'additional_info')
-
-
-class CreateBillPaymentSerializer(GenericTransactionSerializer):
-
-    class Meta:
-        model = models.BillPayment
-        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
-                  'account_number', 'bill_type')
 
 
 class CreateGiftOrderSerializer(GenericTransactionSerializer):
