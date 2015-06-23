@@ -134,17 +134,21 @@ class GenericTransactionAdmin(admin.ModelAdmin):
         obj.save()
 
 
-class AirtimeTopupAdmin(GenericTransactionAdmin):
+class InstantPaymentAdmin(GenericTransactionAdmin):
 
     def __init__(self, model, admin_site):
-        super(AirtimeTopupAdmin, self).__init__(model, admin_site)
-        addtl_readonly_fields = ('network', 'service_fee_url', 'service_charge',
+        super(InstantPaymentAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ('service_fee_url', 'service_charge',
                                  'amount_usd', 'amount_ghs')
-        addtl_fieldset = ('network', 'service_fee_url')
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
-        addtl_fieldset = ('Airtime', {'fields': addtl_fieldset})
-        self.fieldsets = (self.fieldsets[0], self.fieldsets[1],
-                          addtl_fieldset, self.fieldsets[2])
+
+        pricing_fieldset = ('Pricing', {
+            'fields': ('exchange_rate_url', 'service_fee_url', 'amount_ghs',
+                       'amount_usd', 'service_charge', 'total_charge_usd')
+        })
+
+        self.fieldsets = (self.fieldsets[0], pricing_fieldset,
+                          self.fieldsets[2])
 
     def service_fee_url(self, obj):
         path = settings.API_BASE_URL + 'admin/pricing/servicefee'
@@ -154,11 +158,41 @@ class AirtimeTopupAdmin(GenericTransactionAdmin):
     service_fee_url.allow_tags = True
     service_fee_url.short_description = 'service fee'
 
+
+class AirtimeTopupAdmin(InstantPaymentAdmin):
+
+    def __init__(self, model, admin_site):
+        super(AirtimeTopupAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ('network', 'phone_number')
+        addtl_fieldset = ('phone_number', 'network')
+        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
+        addtl_fieldset = ('Airtime', {'fields': addtl_fieldset})
+        self.fieldsets = (self.fieldsets[0], addtl_fieldset,
+                          self.fieldsets[1], self.fieldsets[2])
+
+    def phone_number(self, obj):
+        return obj.sender.profile.phone_number
+
+    phone_number.allow_tags = True
+    phone_number.short_description = 'phone number'
+
     def save_model(self, request, obj, form, change):
         super(AirtimeTopupAdmin, self).save_model(request, obj, form, change)
 
         if 'state' in form.changed_data and obj.state == c.PROCESSED:
             obj.post_processed()
+
+
+class BillPaymentAdmin(InstantPaymentAdmin):
+
+    def __init__(self, model, admin_site):
+        super(BillPaymentAdmin, self).__init__(model, admin_site)
+        addtl_readonly_fields = ('bill_type', )
+        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
+        addtl_fieldset = ('bill_type', 'account_number', 'reference')
+        addtl_fieldset = ('Bill', {'fields': addtl_fieldset})
+        self.fieldsets = (self.fieldsets[0], addtl_fieldset,
+                          self.fieldsets[1], self.fieldsets[2])
 
 
 class ValetAdmin(GenericTransactionAdmin):
@@ -181,18 +215,6 @@ class SchoolFeeAdmin(GenericTransactionAdmin):
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
         addtl_fieldset = ('ward_name', 'school', 'additional_info')
         addtl_fieldset = ('School Fees', {'fields': addtl_fieldset})
-        self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2])
-
-
-class BillPaymentAdmin(GenericTransactionAdmin):
-
-    def __init__(self, model, admin_site):
-        super(BillPaymentAdmin, self).__init__(model, admin_site)
-        addtl_readonly_fields = ('bill_type', )
-        self.readonly_fields = self.readonly_fields + addtl_readonly_fields
-        addtl_fieldset = ('account_number', 'bill_type')
-        addtl_fieldset = ('Bill', {'fields': addtl_fieldset})
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
                           self.fieldsets[1], self.fieldsets[2])
 

@@ -127,7 +127,7 @@ class CreateBillPaymentSerializer(InstantPaymentSerializer):
     class Meta:
         model = models.BillPayment
         fields = ('recipient', 'recipient_id', 'preferred_contact_method',
-                  'account_number', 'bill_type')
+                  'account_number', 'amount_ghs', 'bill_type', 'reference')
 
 
 class CreateValetSerializer(GenericTransactionSerializer):

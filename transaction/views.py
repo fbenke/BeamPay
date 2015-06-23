@@ -57,33 +57,43 @@ class CreateGenericTransaction(GenericAPIView):
             raise AccountException(constants.PROFILE_INCOMPLETE)
 
     def generate_response(self, transaction):
+
         return {'reference_number': transaction.reference_number}
 
 
-class CreateAirtimeTopup(CreateGenericTransaction):
-
-    serializer_class = serializers.CreateAirtimeTopupSerializer
+class CreateInstantPayemt(CreateGenericTransaction):
 
     def check_parameters(self, request):
 
-        super(CreateAirtimeTopup, self).check_parameters(request)
+        super(CreateInstantPayemt, self).check_parameters(request)
 
-        # check if Exchange Rate or Airtime Fee has expired
+        amount_ghs = request.data.get('amount_ghs', None)
         exchange_rate_id = request.data.get('exchange_rate_id', None)
         service_fee_id = request.data.get('service_fee_id', None)
 
-        if not exchange_rate_id or not service_fee_id:
+        if not amount_ghs or not exchange_rate_id or not service_fee_id:
             raise APIException(constants.INVALID_PARAMETERS)
 
+        # check if Exchange Rate or Service Charge has expired
         if (get_current_exchange_rate().id != exchange_rate_id or
                 get_current_service_fee().id != service_fee_id):
             raise APIException(constants.PRICING_EXPIRED)
 
     def generate_response(self, transaction):
 
-        response_dict = super(CreateAirtimeTopup, self).generate_response(transaction)
+        response_dict = super(CreateInstantPayemt, self).generate_response(transaction)
         response_dict['charge_usd'] = transaction.total_charge_usd
         return response_dict
+
+
+class CreateAirtimeTopup(CreateInstantPayemt):
+
+    serializer_class = serializers.CreateAirtimeTopupSerializer
+
+
+class CreateBillPayment(CreateInstantPayemt):
+
+    serializer_class = serializers.CreateBillPaymentSerializer
 
 
 class CreateValetTransaction(CreateGenericTransaction):
@@ -94,11 +104,6 @@ class CreateValetTransaction(CreateGenericTransaction):
 class CreateSchoolFeePayment(CreateGenericTransaction):
 
     serializer_class = serializers.CreateSchoolFeeSerializer
-
-
-class CreateBillPayment(CreateGenericTransaction):
-
-    serializer_class = serializers.CreateBillPaymentSerializer
 
 
 class CreateGiftOrder(CreateGenericTransaction):

@@ -259,6 +259,12 @@ class BillPayment(AbstractTransaction):
         help_text='Reference for bill payment'
     )
 
+    service_fee = models.ForeignKey(
+        ServiceFee,
+        related_name='bill_payment',
+        help_text='Service fee applied to this bill payment'
+    )
+
 
 class Gift(AbstractTransaction):
 
