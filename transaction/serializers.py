@@ -99,19 +99,19 @@ class CreateAirtimeTopupSerializer(GenericTransactionSerializer):
         exchange_rate = get_current_exchange_rate()
         service_fee = get_current_service_fee()
 
-        airtime_topup = models.AirtimeTopup.objects.create(
+        topup = models.AirtimeTopup.objects.create(
             sender=user,
             exchange_rate=exchange_rate,
             service_fee=service_fee,
             recipient=recipient,
-            service_charge=service_fee.fixed_fee,
             **validated_data
         )
 
-        airtime_topup.amount_usd = airtime_topup.amount_ghs / exchange_rate.usd_ghs
-        self._initial_values(airtime_topup)
+        topup.amount_usd = topup.amount_ghs / exchange_rate.usd_ghs
+        topup.service_charge = topup.amount_usd * topup.service_fee.percentual_fee
+        self._initial_values(topup)
 
-        return airtime_topup
+        return topup
 
 
 class CreateValetSerializer(GenericTransactionSerializer):

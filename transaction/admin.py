@@ -105,8 +105,8 @@ class GenericTransactionAdmin(admin.ModelAdmin):
                        'reference_number', 'state', 'last_changed')
         }),
         ('Pricing', {
-            'fields': ('exchange_rate_url', 'amount_usd',
-                       'amount_ghs', 'service_charge',
+            'fields': ('exchange_rate_url', 'amount_ghs',
+                       'amount_usd', 'service_charge',
                        'total_charge_usd')
         }),
         ('Payments', {

@@ -80,6 +80,7 @@ class CreateAirtimeTopup(CreateGenericTransaction):
             raise APIException(constants.PRICING_EXPIRED)
 
     def generate_response(self, transaction):
+
         response_dict = super(CreateAirtimeTopup, self).generate_response(transaction)
         response_dict['charge_usd'] = transaction.total_charge_usd
         return response_dict
