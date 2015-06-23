@@ -211,7 +211,7 @@ class SchoolFeeAdmin(GenericTransactionAdmin):
 
     def __init__(self, model, admin_site):
         super(SchoolFeeAdmin, self).__init__(model, admin_site)
-        addtl_readonly_fields = ('ward_name', 'school', 'additional_info')
+        addtl_readonly_fields = ()
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
         addtl_fieldset = ('ward_name', 'school', 'additional_info')
         addtl_fieldset = ('School Fees', {'fields': addtl_fieldset})

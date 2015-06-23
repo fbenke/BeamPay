@@ -197,7 +197,6 @@ class ValetTransaction(AbstractTransaction):
     description = models.TextField(
         'Description',
         max_length=500,
-        blank=True,
         help_text='Description of the valet request'
     )
 
@@ -207,14 +206,12 @@ class SchoolFeePayment(AbstractTransaction):
     ward_name = models.CharField(
         'Name of ward or student',
         max_length=100,
-        blank=True,
         help_text='Name of ward'
     )
 
     school = models.CharField(
         'Name of school',
         max_length=100,
-        blank=True,
         help_text='Name of school or university'
     )
 
