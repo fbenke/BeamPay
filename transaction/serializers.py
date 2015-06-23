@@ -16,6 +16,9 @@ from pricing.models import get_current_exchange_rate, get_current_service_fee
 from account import constants as c
 
 
+common_serializer_fields = ('recipient', 'recipient_id', 'preferred_contact_method')
+
+
 class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -118,53 +121,35 @@ class CreateAirtimeTopupSerializer(InstantPaymentSerializer):
 
     class Meta:
         model = models.AirtimeTopup
-        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
-                  'network', 'amount_ghs')
+        fields = common_serializer_fields + ('network', 'amount_ghs')
 
 
 class CreateBillPaymentSerializer(InstantPaymentSerializer):
 
     class Meta:
         model = models.BillPayment
-        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
-                  'account_number', 'amount_ghs', 'bill_type', 'reference')
+        fields = common_serializer_fields + (
+            'account_number', 'amount_ghs', 'bill_type', 'reference')
 
 
 class CreateValetSerializer(GenericTransactionSerializer):
 
     class Meta:
         model = models.ValetTransaction
-        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
-                  'description')
+        fields = common_serializer_fields + ('description', )
 
 
 class CreateSchoolFeeSerializer(GenericTransactionSerializer):
 
     class Meta:
         model = models.SchoolFeePayment
-        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
-                  'ward_name', 'school', 'additional_info')
+        fields = common_serializer_fields + (
+            'ward_name', 'school', 'additional_info')
 
 
 class CreateGiftOrderSerializer(GenericTransactionSerializer):
 
     class Meta:
         model = models.Gift
-        fields = ('recipient', 'recipient_id', 'preferred_contact_method',
-                  'gift_type', 'delivery_address', 'delivery_time', 'additional_info')
-
-
-# class TransactionSerializer(serializers.ModelSerializer):
-
-#     recipient = RecipientSerializer(many=False)
-#     comments = CommentSerializer(many=True)
-
-#     class Meta:
-#         model = models.Transaction
-#         depth = 1
-#         read_only_fields = (
-#             'id', 'reference_number', 'state', 'last_changed', 'transaction_type',
-#             'additional_info', 'cost_of_delivery_usd', 'cost_of_delivery_ghs',
-#             'service_charge', 'recipient', 'comments'
-#         )
-#         fields = read_only_fields + ()
+        fields = common_serializer_fields + (
+            'gift_type', 'delivery_address', 'delivery_time', 'additional_info')
