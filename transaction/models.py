@@ -160,7 +160,7 @@ class AirtimeTopup(AbstractTransaction):
         help_text='Service fee applied to this topup'
     )
 
-    # TODO: revisit
+    # TODO: revisit for payments
     def post_paid(self):
 
         mails.send_mail(
