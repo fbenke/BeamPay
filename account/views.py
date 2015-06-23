@@ -492,7 +492,7 @@ class SigninFacebook(APIView):
                 if user.is_active:
                     token, created = Token.objects.get_or_create(user=user)
                     return Response(
-                        {'token': token.key, 'id': user.id, 'new_user': exists},
+                        {'token': token.key, 'id': user.id, 'new_user': new_user},
                         status=status.HTTP_201_CREATED
                     )
 
