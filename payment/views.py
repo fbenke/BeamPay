@@ -63,7 +63,7 @@ class StripeCharge(GenericAPIView):
             transaction.state = t.PAID
             transaction.save()
 
-            transaction.post_paid()
+            # transaction.post_paid()
 
             return Response(status=status.HTTP_201_CREATED)
 
