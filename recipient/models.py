@@ -34,7 +34,7 @@ class Recipient(models.Model):
     )
 
     phone_number = models.CharField(
-        'Mobile Money Phone Number',
+        'Phone Number',
         max_length=15,
         help_text='Phone number of recipient'
     )

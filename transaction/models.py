@@ -160,6 +160,12 @@ class AirtimeTopup(AbstractTransaction):
         help_text='Service fee applied to this topup'
     )
 
+    phone_number = models.CharField(
+        'Phone Number',
+        max_length=15,
+        help_text='Phone number of recipient'
+    )
+
     # TODO: revisit for payments
     def post_paid(self):
 

@@ -170,12 +170,6 @@ class AirtimeTopupAdmin(InstantPaymentAdmin):
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
                           self.fieldsets[1], self.fieldsets[2])
 
-    def phone_number(self, obj):
-        return obj.sender.profile.phone_number
-
-    phone_number.allow_tags = True
-    phone_number.short_description = 'phone number'
-
     def save_model(self, request, obj, form, change):
         super(AirtimeTopupAdmin, self).save_model(request, obj, form, change)
 

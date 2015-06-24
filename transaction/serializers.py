@@ -121,7 +121,7 @@ class CreateAirtimeTopupSerializer(InstantPaymentSerializer):
 
     class Meta:
         model = models.AirtimeTopup
-        fields = common_serializer_fields + ('network', 'amount_ghs')
+        fields = common_serializer_fields + ('phone_number', 'network', 'amount_ghs')
 
 
 class CreateBillPaymentSerializer(InstantPaymentSerializer):
