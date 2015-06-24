@@ -4,7 +4,6 @@ from stripe.error import CardError, InvalidRequestError
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
 
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
@@ -13,98 +12,42 @@ from rest_framework.response import Response
 
 from beam_value.permissions import IsNoAdmin
 
-from transaction.models import AirtimeTopup
 from transaction.utils import TransactionException
+from transaction import constants as t
 
-from payment import constants
+from payment import constants as p
 
-
-# class StripeChargeTransaction(GenericAPIView):
-
-#     permission_classes = (IsAuthenticated, IsNoAdmin)
-
-#     def post(self, request):
-
-#         token = request.data.get('stripe_token', None)
-#         transaction_id = request.data.get('transaction_id', None)
-
-#         if not token or not transaction_id:
-#             return Response(
-#                 {'detail': constants.INVALID_PARAMETERS},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-#         try:
-
-#             user_id = request.user.id
-
-#             transaction = Transaction.objects.get(
-#                 id=transaction_id,
-#                 sender__id=user_id)
-
-#             if transaction.charge_usd:
-#                 amount_usd = int(transaction.charge_usd * 100)
-#             else:
-#                 raise TransactionException
-
-#             stripe.api_key = settings.STRIPE_SECRET_KEY
-
-#             charge = Charge.create(
-#                 amount=amount_usd,
-#                 currency='USD',
-#                 source=token,
-#                 description=transaction.reference_number
-#             )
-
-#             transaction.payment_reference = charge.id
-#             transaction.payment_processor = Transaction.STRIPE
-#             transaction.state = Transaction.PAID
-#             transaction.save()
-
-#             transaction.add_status_change(comment=Transaction.PAID)
-
-#             return Response(status=status.HTTP_201_CREATED)
-
-#         except (CardError, InvalidRequestError) as e:
-#             return Response(
-#                 {'detail': e[0]},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
-
-#         except (ObjectDoesNotExist, TransactionException):
-#             return Response(
-#                 {'detail': constants.INVALID_PARAMETERS},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
+mod = __import__('transaction.models', fromlist=['AirtimeTopup'])
 
 
-class StripeChargeAirtime(GenericAPIView):
+class StripeCharge(GenericAPIView):
 
     permission_classes = (IsAuthenticated, IsNoAdmin)
 
     def post(self, request):
 
-        token = request.data.get('stripe_token', None)
-        transaction_id = request.data.get('transaction_id', None)
-
-        if not token or not transaction_id:
-            return Response(
-                {'detail': constants.INVALID_PARAMETERS},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
+
+            token = request.data.get('stripe_token', None)
+            transaction_id = request.data.get('transaction_id', None)
+            txn_type = request.data.get('type', None)
+
+            if not token or not transaction_id:
+                raise TransactionException
+
+            if not txn_type or txn_type not in t.INSTANT_PAYMENTS:
+                raise TransactionException
+
+            payment_class = getattr(mod, t.TXN_TYPE_2_MODEL[txn_type])
 
             user_id = request.user.id
 
-            airtime_topup = AirtimeTopup.objects.get(
+            transaction = payment_class.objects.get(
                 id=transaction_id,
-                sender__id=user_id)
+                sender__id=user_id,
+                state=t.INIT)
 
-            if airtime_topup.charge_usd:
-                amount_usd = int(airtime_topup.charge_usd * 100)
-            else:
-                raise TransactionException
+            amount_usd = int(transaction.total_charge_usd * 100)
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -112,27 +55,28 @@ class StripeChargeAirtime(GenericAPIView):
                 amount=amount_usd,
                 currency='USD',
                 source=token,
-                description=airtime_topup.reference_number
+                description=transaction.reference_number
             )
 
-            airtime_topup.payment_reference = charge.id
-            airtime_topup.payment_processor = AirtimeTopup.STRIPE
-            airtime_topup.state = AirtimeTopup.PAID
-            airtime_topup.paid_at = timezone.now()
-            airtime_topup.save()
+            transaction.payment_reference = charge.id
+            transaction.payment_processor = t.STRIPE
+            transaction.state = t.PAID
+            transaction.save()
 
-            airtime_topup.post_paid()
+            transaction.post_paid()
 
             return Response(status=status.HTTP_201_CREATED)
 
-        except (CardError, InvalidRequestError) as e:
+        except (CardError, InvalidRequestError, TypeError) as e:
+
             return Response(
                 {'detail': e[0]},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
         except (ObjectDoesNotExist, TransactionException):
+
             return Response(
-                {'detail': constants.INVALID_PARAMETERS},
+                {'detail': p.INVALID_PARAMETERS},
                 status=status.HTTP_400_BAD_REQUEST
             )

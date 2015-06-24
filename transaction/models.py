@@ -166,7 +166,6 @@ class AirtimeTopup(AbstractTransaction):
         help_text='Phone number of recipient'
     )
 
-    # TODO: revisit for payments
     def post_paid(self):
 
         mails.send_mail(
@@ -196,38 +195,6 @@ class AirtimeTopup(AbstractTransaction):
             to_email=self.sender.email,
             html_email_template_name=settings.MAIL_AITRIME_TOPUP_COMPLETE_HTML
         )
-
-
-class ValetTransaction(AbstractTransaction):
-
-    description = models.TextField(
-        'Description',
-        max_length=500,
-        help_text='Description of the valet request'
-    )
-
-
-class SchoolFeePayment(AbstractTransaction):
-
-    ward_name = models.CharField(
-        'Name of ward or student',
-        max_length=100,
-        help_text='Name of ward'
-    )
-
-    school = models.CharField(
-        'Name of school',
-        max_length=100,
-        help_text='Name of school or university'
-    )
-
-    additional_info = models.TextField(
-        'Additional information',
-        max_length=500,
-        blank=True,
-        help_text='Anything else required to know about\
-        the payment, e.g. hall, class, student id'
-    )
 
 
 class BillPayment(AbstractTransaction):
@@ -266,6 +233,38 @@ class BillPayment(AbstractTransaction):
         ServiceFee,
         related_name='bill_payment',
         help_text='Service fee applied to this bill payment'
+    )
+
+
+class ValetTransaction(AbstractTransaction):
+
+    description = models.TextField(
+        'Description',
+        max_length=500,
+        help_text='Description of the valet request'
+    )
+
+
+class SchoolFeePayment(AbstractTransaction):
+
+    ward_name = models.CharField(
+        'Name of ward or student',
+        max_length=100,
+        help_text='Name of ward'
+    )
+
+    school = models.CharField(
+        'Name of school',
+        max_length=100,
+        help_text='Name of school or university'
+    )
+
+    additional_info = models.TextField(
+        'Additional information',
+        max_length=500,
+        blank=True,
+        help_text='Anything else required to know about\
+        the payment, e.g. hall, class, student id'
     )
 
 
