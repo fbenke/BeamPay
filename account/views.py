@@ -220,7 +220,10 @@ class Signin(APIView):
             authenticated_user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=authenticated_user)
             return Response(
-                {'token': token.key, 'id': authenticated_user.id})
+                {'token': token.key,
+                 'id': authenticated_user.id,
+                 'complete': authenticated_user.profile.information_complete}
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -488,11 +491,18 @@ class SigninFacebook(APIView):
             try:
                 new_user, user = auth_by_token(request, backend)
 
+                response_dict = {
+                    'id': user.id,
+                    'new_user': new_user,
+                    'complete': user.profile.information_complete
+                }
+
                 # active user was created or matched via email
                 if user.is_active:
                     token, created = Token.objects.get_or_create(user=user)
+                    response_dict['token'] = token.key
                     return Response(
-                        {'token': token.key, 'id': user.id, 'new_user': new_user},
+                        response_dict,
                         status=status.HTTP_201_CREATED
                     )
 
@@ -510,8 +520,9 @@ class SigninFacebook(APIView):
                     user.userena_signup.save()
                     user.save()
                     token, created = Token.objects.get_or_create(user=user)
+                    response_dict['token'] = token.key
                     return Response(
-                        {'token': token.key, 'id': user.id, 'new_user': new_user},
+                        response_dict,
                         status=status.HTTP_201_CREATED
                     )
 
