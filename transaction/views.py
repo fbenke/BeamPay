@@ -58,7 +58,10 @@ class CreateGenericTransaction(GenericAPIView):
 
     def generate_response(self, transaction):
 
-        return {'reference_number': transaction.reference_number}
+        return {
+            'txn_id': transaction.id,
+            'reference_number': transaction.reference_number
+        }
 
 
 class CreateInstantPayemt(CreateGenericTransaction):
