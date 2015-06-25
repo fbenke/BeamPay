@@ -96,7 +96,7 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     readonly_fields = (
         'id', 'sender_url', 'recipient_url', 'exchange_rate_url',
         'total_charge_usd', 'reference_number', 'last_changed',
-        'payment_processor', 'payment_reference', 'contact_method'
+        'contact_method'
     )
 
     fieldsets = (
@@ -139,7 +139,8 @@ class InstantPaymentAdmin(GenericTransactionAdmin):
     def __init__(self, model, admin_site):
         super(InstantPaymentAdmin, self).__init__(model, admin_site)
         addtl_readonly_fields = ('service_fee_url', 'service_charge',
-                                 'amount_usd', 'amount_ghs')
+                                 'amount_usd', 'amount_ghs', 'payment_processor',
+                                 'payment_reference')
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
 
         pricing_fieldset = ('Pricing', {
