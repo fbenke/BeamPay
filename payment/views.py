@@ -17,7 +17,7 @@ from transaction import constants as t
 
 from payment import constants as p
 
-mod = __import__('transaction.models', fromlist=['AirtimeTopup'])
+mod = __import__('transaction.models', fromlist=t.INSTANT_PAYMENT_MODELS)
 
 
 class StripeCharge(GenericAPIView):
@@ -45,7 +45,8 @@ class StripeCharge(GenericAPIView):
             transaction = payment_class.objects.get(
                 id=transaction_id,
                 sender__id=user_id,
-                state=t.INIT)
+                state=t.INIT
+            )
 
             amount_usd = int(transaction.total_charge_usd * 100)
 
@@ -62,8 +63,8 @@ class StripeCharge(GenericAPIView):
             transaction.payment_processor = t.STRIPE
             transaction.state = t.PAID
             transaction.save()
-
-            # transaction.post_paid()
+            transaction.add_status_change(t.PAID)
+            transaction.post_paid()
 
             return Response(status=status.HTTP_201_CREATED)
 

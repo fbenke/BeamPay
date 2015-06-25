@@ -284,12 +284,16 @@ MAIL_CHANGE_EMAIL_NEW_SUBJECT = 'userena/emails/confirmation_email_subject_new.t
 MAIL_CHANGE_EMAIL_NEW_TEXT = 'userena/emails/confirmation_email_message_new.txt'
 MAIL_CHANGE_EMAIL_NEW_HTML = 'userena/emails/confirmation_email_message_new.html'
 
-MAIL_AITRIME_TOPUP_COMPLETE_SUBJECT = 'emails/airtime_topup_complete_subject.txt'
-MAIL_AITRIME_TOPUP_COMPLETE_TEXT = 'emails/airtime_topup_complete_message.txt'
-MAIL_AITRIME_TOPUP_COMPLETE_HTML = 'emails/airtime_topup_complete_message.html'
+MAIL_AIRTIME_COMPLETE_SUBJECT = 'emails/airtime_complete_subject.txt'
+MAIL_AIRTIME_COMPLETE_TEXT = 'emails/airtime_complete_message.txt'
+MAIL_AIRTIME_COMPLETE_HTML = 'emails/airtime_complete_message.html'
+MAIL_BILL_COMPLETE_SUBJECT = 'emails/bill_complete_subject.txt'
+MAIL_BILL_COMPLETE_TEXT = 'emails/bill_complete_message.txt'
+MAIL_BILL_COMPLETE_HTML = 'emails/bill_complete_message.html'
 
-MAIL_NOTIFY_ADMIN_PAID_SUBJECT = 'emails/airtime_topup_paid_subject.txt'
-MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/airtime_topup_paid_message.txt'
+
+MAIL_NOTIFY_ADMIN_PAID_SUBJECT = 'emails/transaction_paid_subject.txt'
+MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/transaction_paid_message.txt'
 
 # User-Facing URLs in Email templates
 MAIL_ACTIVATION_URL = '#!/auth/activate/{}/'

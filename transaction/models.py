@@ -138,7 +138,28 @@ class AbstractTransaction(models.Model):
             return None
 
 
-class AirtimeTopup(AbstractTransaction):
+class InstantPaymentTransaction(AbstractTransaction):
+
+    class Meta:
+        ordering = ['-last_changed']
+        abstract = True
+
+    def post_paid(self):
+
+        mails.send_mail(
+            subject_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_SUBJECT,
+            email_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_TEXT,
+            context={
+                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
+                'protocol': settings.PROTOCOL,
+                'id': self.id,
+                'type': self.__class__.__name__
+            },
+            to_email=mails.get_admin_mail_addresses()
+        )
+
+
+class AirtimeTopup(InstantPaymentTransaction):
 
     NETWORK_CHOICES = (
         (c.VODAFONE, 'Vodafone'),
@@ -166,46 +187,33 @@ class AirtimeTopup(AbstractTransaction):
         help_text='Phone number of recipient'
     )
 
-    def post_paid(self):
-
-        mails.send_mail(
-            subject_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_SUBJECT,
-            email_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_TEXT,
-            context={
-                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
-                'protocol': settings.PROTOCOL,
-                'id': self.id
-            },
-            to_email=mails.get_admin_mail_addresses()
-        )
-
     def post_processed(self):
 
         context = {
             'first_name': self.sender.first_name,
             'amount_ghs': self.amount_ghs,
-            'phone_number': self.recipient.phone_number,
+            'phone_number': self.phone_number,
         }
 
         mails.send_mail(
-            subject_template_name=settings.MAIL_AITRIME_TOPUP_COMPLETE_SUBJECT,
-            email_template_name=settings.MAIL_AITRIME_TOPUP_COMPLETE_TEXT,
+            subject_template_name=settings.MAIL_AIRTIME_COMPLETE_SUBJECT,
+            email_template_name=settings.MAIL_AIRTIME_COMPLETE_TEXT,
             context=context,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=settings.BEAM_MAIL_ADDRESS,
             to_email=self.sender.email,
-            html_email_template_name=settings.MAIL_AITRIME_TOPUP_COMPLETE_HTML
+            html_email_template_name=settings.MAIL_AIRTIME_COMPLETE_HTML
         )
 
 
-class BillPayment(AbstractTransaction):
+class BillPayment(InstantPaymentTransaction):
 
     BILL_CHOICES = (
-        (c.EGC_POSTPAID, 'ECG (electricity)'),
-        (c.GWC_WATER, 'GWC (water)'),
-        (c.DSTV, 'DSTv'),
-        (c.GOTV, 'GOTv'),
-        (c.SURFLINE, 'surfline'),
-        (c.VODAFONE_BROADBAND, 'Vodafone broadband')
+        (c.EGC_POSTPAID, c.EGC_POSTPAID_DESC),
+        (c.GWC_WATER, c.GWC_WATER_DESC),
+        (c.DSTV, c.DSTV_DESC),
+        (c.GOTV, c.GOTV_DESC),
+        (c.SURFLINE, c.SURFLINE_DESC),
+        (c.VODAFONE_BROADBAND, c.VODAFONE_BROADBAND_DESC)
     )
 
     account_number = models.CharField(
@@ -234,6 +242,23 @@ class BillPayment(AbstractTransaction):
         related_name='bill_payment',
         help_text='Service fee applied to this bill payment'
     )
+
+    def post_processed(self):
+
+        context = {
+            'first_name': self.sender.first_name,
+            'type': self.bill_type,
+            'account_number': self.account_number
+        }
+
+        mails.send_mail(
+            subject_template_name=settings.MAIL_BILL_COMPLETE_SUBJECT,
+            email_template_name=settings.MAIL_BILL_COMPLETE_TEXT,
+            context=context,
+            from_email=settings.BEAM_MAIL_ADDRESS,
+            to_email=self.sender.email,
+            html_email_template_name=settings.MAIL_BILL_COMPLETE_HTML
+        )
 
 
 class ValetTransaction(AbstractTransaction):

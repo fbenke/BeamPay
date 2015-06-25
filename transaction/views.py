@@ -84,7 +84,8 @@ class CreateInstantPayemt(CreateGenericTransaction):
 
     def generate_response(self, transaction):
 
-        response_dict = super(CreateInstantPayemt, self).generate_response(transaction)
+        response_dict = super(CreateInstantPayemt, self).generate_response(
+            transaction)
         response_dict['charge_usd'] = transaction.total_charge_usd
         return response_dict
 

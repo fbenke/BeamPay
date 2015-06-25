@@ -68,7 +68,7 @@ class GenericTransactionSerializer(serializers.ModelSerializer):
 
         transaction.reference_number = generate_reference_number()
         transaction.save()
-        transaction.add_status_change('INIT')
+        transaction.add_status_change(c.INIT)
 
     def create(self, validated_data):
 

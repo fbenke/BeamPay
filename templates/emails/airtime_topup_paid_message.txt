@@ -1,7 +1,0 @@
-Dear Admin,
-
-There is a transaction on waiting to be processed. Please go to {{ protocol }}://{{ domain }}/admin/transaction/airtimetopup/{{ id }}/.
-
-Sincerely,
-
-The SendGridBot

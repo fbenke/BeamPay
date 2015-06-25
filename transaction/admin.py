@@ -122,7 +122,6 @@ class GenericTransactionAdmin(admin.ModelAdmin):
                 comment=getattr(obj, 'state')
             )
 
-        # TODO: check
         if 'amount_ghs' in form.changed_data and getattr(obj, 'amount_ghs'):
             obj.exchange_rate = get_current_exchange_rate()
             obj.amount_usd = getattr(obj, 'amount_ghs') / obj.exchange_rate.usd_ghs
@@ -159,6 +158,12 @@ class InstantPaymentAdmin(GenericTransactionAdmin):
     service_fee_url.allow_tags = True
     service_fee_url.short_description = 'service fee'
 
+    def save_model(self, request, obj, form, change):
+        super(InstantPaymentAdmin, self).save_model(request, obj, form, change)
+
+        if 'state' in form.changed_data and obj.state == c.PROCESSED:
+            obj.post_processed()
+
 
 class AirtimeTopupAdmin(InstantPaymentAdmin):
 
@@ -170,12 +175,6 @@ class AirtimeTopupAdmin(InstantPaymentAdmin):
         addtl_fieldset = ('Airtime', {'fields': addtl_fieldset})
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
                           self.fieldsets[1], self.fieldsets[2])
-
-    def save_model(self, request, obj, form, change):
-        super(AirtimeTopupAdmin, self).save_model(request, obj, form, change)
-
-        if 'state' in form.changed_data and obj.state == c.PROCESSED:
-            obj.post_processed()
 
 
 class BillPaymentAdmin(InstantPaymentAdmin):
