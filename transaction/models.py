@@ -153,7 +153,7 @@ class InstantPaymentTransaction(AbstractTransaction):
                 'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
                 'protocol': settings.PROTOCOL,
                 'id': self.id,
-                'type': self.__class__.__name__
+                'type': str.lower(self.__class__.__name__)
             },
             to_email=mails.get_admin_mail_addresses()
         )

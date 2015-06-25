@@ -22,7 +22,7 @@ mod = __import__('transaction.models', fromlist=t.INSTANT_PAYMENT_MODELS)
 
 class StripeCharge(GenericAPIView):
 
-    permission_classes = (IsAuthenticated, IsNoAdmin)
+    # permission_classes = (IsAuthenticated, IsNoAdmin)
 
     def post(self, request):
 
