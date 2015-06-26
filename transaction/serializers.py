@@ -14,6 +14,7 @@ from recipient.serializers import RecipientSerializer
 from pricing.models import get_current_exchange_rate, get_current_service_fee
 
 from account import constants as c
+from transaction import constants as t
 
 
 common_serializer_fields = ('recipient', 'recipient_id', 'preferred_contact_method')
@@ -68,7 +69,7 @@ class GenericTransactionSerializer(serializers.ModelSerializer):
 
         transaction.reference_number = generate_reference_number()
         transaction.save()
-        transaction.add_status_change(c.INIT)
+        transaction.add_status_change(t.INIT)
 
     def create(self, validated_data):
 
