@@ -1,3 +1,7 @@
+from itertools import chain
+
+from django.core.exceptions import ObjectDoesNotExist
+
 from rest_framework import status
 from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +18,9 @@ from pricing.models import get_current_exchange_rate, get_current_service_fee
 
 from transaction import serializers
 from transaction import constants
+from transaction import models
+
+mod = __import__('transaction.models', fromlist=constants.TRANSACTION_MODELS)
 
 
 class CreateGenericTransaction(GenericAPIView):
@@ -114,25 +121,77 @@ class CreateGiftOrder(CreateGenericTransaction):
 
     serializer_class = serializers.CreateGiftOrderSerializer
 
-# class ViewTransactions(ListAPIView):
 
-#     serializer_class = serializers.TransactionSerializer
-#     permission_classes = (IsAuthenticated, IsNoAdmin)
-
-#     paginate_by = 10
-
-#     def get_queryset(self):
-#         user = self.request.user
-#         queryset = Transaction.objects.filter(sender__id=user.id)
-#         return queryset
+MODEL_2_SERIALIZER = {
+    models.AirtimeTopup: serializers.AirtimeSerializer,
+    models.BillPayment: serializers.BillPaymentSerializer,
+    models.SchoolFeePayment: serializers.SchoolFeeSerializer,
+    models.Gift: serializers.GiftSerializer,
+    models.ValetTransaction: serializers.ValetSerializer
+}
 
 
-# class GetTransaction(RetrieveAPIView):
+class ViewTransactions(ListAPIView):
 
-#     serializer_class = serializers.TransactionSerializer
-#     permission_classes = (IsAuthenticated, IsNoAdmin)
+    permission_classes = (IsAuthenticated, IsNoAdmin)
+    serializer_class = serializers.TransactionSerializer
+    paginate_by = 20
 
-#     def get_queryset(self):
-#         user = self.request.user
-#         queryset = Transaction.objects.filter(sender__id=user.id)
-#         return queryset
+    def get_queryset(self):
+
+        user = self.request.user
+        airtime = models.AirtimeTopup.objects.filter(sender=user)
+        bills = models.BillPayment.objects.filter(sender=user)
+        school_fees = models.SchoolFeePayment.objects.filter(sender=user)
+        gifts = models.Gift.objects.filter(sender=user)
+        valet = models.ValetTransaction.objects.filter(sender=user)
+
+        results_list = list(chain(
+            airtime, bills, school_fees, valet, gifts)
+        )
+
+        sorted_list = sorted(results_list, key=lambda instance: instance.last_changed)
+
+        results = list()
+
+        for entry in sorted_list:
+
+            item_type = entry.__class__.__name__.lower()
+            serializer_model = MODEL_2_SERIALIZER[entry.__class__]
+            serializer = serializer_model(entry)
+
+            results.append({'txn_type': item_type, 'data': serializer.data})
+
+        return results
+
+
+class GetTransaction(RetrieveAPIView):
+
+    permission_classes = (IsAuthenticated, IsNoAdmin)
+    lookup_field = 'id'
+
+    def get(self, request, *args, **kwargs):
+
+        user = self.request.user
+        txn_type = request.query_params.get('type', None)
+
+        try:
+
+            txn_class = getattr(mod, constants.TXN_TYPE_2_MODEL[txn_type])
+
+            transaction = txn_class.objects.get(
+                sender=user,
+                pk=self.kwargs['pk']
+            )
+
+            serializer_model = MODEL_2_SERIALIZER[txn_class]
+            serializer = serializer_model(transaction)
+
+            return Response(serializer.data)
+
+        except (ObjectDoesNotExist, KeyError):
+
+            return Response(
+                {'detail': constants.INVALID_PARAMETERS},
+                status=status.HTTP_400_BAD_REQUEST
+            )

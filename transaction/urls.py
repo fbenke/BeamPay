@@ -32,14 +32,14 @@ urlpatterns = patterns(
         views.CreateValetTransaction.as_view(),
         name='add_valet'
     ),
-    # url(
-    #     r'^$',
-    #     views.ViewTransactions.as_view(),
-    #     name='list'
-    # ),
-    # url(
-    #     r'^(?P<pk>[0-9]+)/$',
-    #     views.GetTransaction.as_view(),
-    #     name='get'
-    # )
+    url(
+        r'^$',
+        views.ViewTransactions.as_view(),
+        name='list'
+    ),
+    url(
+        r'^(?P<pk>[0-9]+)/$',
+        views.GetTransaction.as_view(),
+        name='get'
+    )
 )

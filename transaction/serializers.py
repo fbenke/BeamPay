@@ -153,3 +153,33 @@ class CreateGiftOrderSerializer(GenericTransactionSerializer):
         model = models.Gift
         fields = common_serializer_fields + (
             'gift_type', 'delivery_address', 'delivery_time', 'additional_info')
+
+
+class TransactionSerializer(serializers.Serializer):
+    txn_type = serializers.CharField(max_length=20)
+    data = serializers.CharField(max_length=10000)
+
+
+class AirtimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.AirtimeTopup
+
+
+class BillPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.BillPayment
+
+
+class SchoolFeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SchoolFeePayment
+
+
+class GiftSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Gift
+
+
+class ValetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ValetTransaction

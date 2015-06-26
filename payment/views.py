@@ -24,7 +24,7 @@ class StripeCharge(GenericAPIView):
 
     permission_classes = (IsAuthenticated, IsNoAdmin)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
 
         try:
 
