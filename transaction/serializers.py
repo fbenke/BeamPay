@@ -161,25 +161,35 @@ class TransactionSerializer(serializers.Serializer):
 
 
 class AirtimeSerializer(serializers.ModelSerializer):
+    recipient = RecipientSerializer(many=False)
+
     class Meta:
         model = models.AirtimeTopup
 
 
 class BillPaymentSerializer(serializers.ModelSerializer):
+    recipient = RecipientSerializer(many=False)
+
     class Meta:
         model = models.BillPayment
 
 
 class SchoolFeeSerializer(serializers.ModelSerializer):
+    recipient = RecipientSerializer(many=False)
+
     class Meta:
         model = models.SchoolFeePayment
 
 
 class GiftSerializer(serializers.ModelSerializer):
+    recipient = RecipientSerializer(many=False)
+
     class Meta:
         model = models.Gift
 
 
 class ValetSerializer(serializers.ModelSerializer):
+    recipient = RecipientSerializer(many=False)
+
     class Meta:
         model = models.ValetTransaction
