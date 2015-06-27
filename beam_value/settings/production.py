@@ -50,7 +50,8 @@ LOCAL_APPS = (
     'payment',
     'pricing',
     'transaction',
-    'recipient'
+    'recipient',
+    'referral'
 )
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -299,6 +300,11 @@ MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/transaction_paid_message.txt'
 MAIL_ACTIVATION_URL = '#!/auth/activate/{}/'
 MAIL_EMAIL_CHANGE_CONFIRM_URL = '#!/auth/settings/email/{}/'
 MAIL_PASSWORD_RESET_URL = '#!/auth/forgot/{}-{}/'
+
+# ==================== Referral Programs ====================
+
+NO_REFERRALS_REQUIRED = 5
+
 
 # ==================== IP-based blocking ====================
 

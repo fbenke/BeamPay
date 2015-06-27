@@ -30,6 +30,8 @@ from beam_value.utils.log import log_error
 from beam_value.utils.ip_analysis import country_blocked, is_tor_node,\
     HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS
 
+from referral.models import create_referral_code
+
 
 def send_activation_email(user, activation_key=None):
 
@@ -88,6 +90,7 @@ class Signup(APIView):
             if user:
 
                 send_activation_email(user)
+                create_referral_code(user)
 
                 return Response(status=status.HTTP_201_CREATED)
 
@@ -499,8 +502,11 @@ class SigninFacebook(APIView):
 
                 # active user was created or matched via email
                 if user.is_active:
+
                     token, created = Token.objects.get_or_create(user=user)
+                    create_referral_code(user)
                     response_dict['token'] = token.key
+
                     return Response(
                         response_dict,
                         status=status.HTTP_201_CREATED
@@ -519,8 +525,11 @@ class SigninFacebook(APIView):
                     user.is_active = True
                     user.userena_signup.save()
                     user.save()
+
                     token, created = Token.objects.get_or_create(user=user)
+                    create_referral_code(user)
                     response_dict['token'] = token.key
+
                     return Response(
                         response_dict,
                         status=status.HTTP_201_CREATED
