@@ -157,8 +157,8 @@ class ViewTransactions(ListAPIView):
         for entry in sorted_list:
 
             item_type = entry.__class__.__name__.lower()
-            serializer_model = MODEL_2_SERIALIZER[entry.__class__]
-            serializer = serializer_model(entry)
+            serializer_class = MODEL_2_SERIALIZER[entry.__class__]
+            serializer = serializer_class(entry)
 
             results.append({'txn_type': item_type, 'data': serializer.data})
 
@@ -168,7 +168,6 @@ class ViewTransactions(ListAPIView):
 class GetTransaction(RetrieveAPIView):
 
     permission_classes = (IsAuthenticated, IsNoAdmin)
-    lookup_field = 'id'
 
     def get(self, request, *args, **kwargs):
 
@@ -184,8 +183,8 @@ class GetTransaction(RetrieveAPIView):
                 pk=self.kwargs['pk']
             )
 
-            serializer_model = MODEL_2_SERIALIZER[txn_class]
-            serializer = serializer_model(transaction)
+            serializer_class = MODEL_2_SERIALIZER[txn_class]
+            serializer = serializer_class(transaction)
 
             return Response(serializer.data)
 

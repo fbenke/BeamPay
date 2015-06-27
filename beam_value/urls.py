@@ -49,6 +49,10 @@ urlpatterns = patterns(
     url(
         r'^api/v1/recipient/',
         include('recipient.urls', namespace='recipient')
+    ),
+    url(
+        r'^api/v1/referral/',
+        include('referral.urls', namespace='referral')
     )
 )
 
