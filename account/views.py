@@ -500,11 +500,13 @@ class SigninFacebook(APIView):
                     'complete': user.profile.information_complete
                 }
 
+                if new_user:
+                    create_referral_code(user)
+
                 # active user was created or matched via email
                 if user.is_active:
 
                     token, created = Token.objects.get_or_create(user=user)
-                    create_referral_code(user)
                     response_dict['token'] = token.key
 
                     return Response(
@@ -527,7 +529,6 @@ class SigninFacebook(APIView):
                     user.save()
 
                     token, created = Token.objects.get_or_create(user=user)
-                    create_referral_code(user)
                     response_dict['token'] = token.key
 
                     return Response(
