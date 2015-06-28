@@ -28,6 +28,18 @@ class ViewReferral(APIView):
         return Response(serializer.data)
 
 
+class ReferralStatus(APIView):
+
+    permission_classes = (IsAuthenticated, IsNoAdmin)
+
+    def get(self, request):
+        user = self.request.user
+        referral = Referral.objects.get(user=user)
+        return Response(
+            {'free_txn': referral.free_transaction}
+        )
+
+
 class AddReferral(APIView):
 
     permission_classes = (IsAuthenticated, IsNoAdmin)

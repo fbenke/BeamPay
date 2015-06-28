@@ -48,6 +48,14 @@ class StripeCharge(GenericAPIView):
                 state=t.INIT
             )
 
+            # redeem free transaction
+            referral = request.user.referral
+
+            if referral.free_transaction:
+                transaction.service_charge = 0
+                referral.redeem_transaction()
+                transaction.save()
+
             amount_usd = int(transaction.total_charge_usd * 100)
 
             stripe.api_key = settings.STRIPE_SECRET_KEY

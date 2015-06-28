@@ -16,5 +16,10 @@ urlpatterns = patterns(
         r'^add/$',
         views.AddReferral.as_view(),
         name='add'
+    ),
+    url(
+        r'^status/$',
+        views.ReferralStatus.as_view(),
+        name='status'
     )
 )

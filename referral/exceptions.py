@@ -1,0 +1,2 @@
+class ReferralException(Exception):
+    pass

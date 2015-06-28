@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from referral.utils import generate_referral_code
+from referral.exceptions import ReferralException
 
 
 def create_referral_code(user):
@@ -70,5 +71,19 @@ class Referral(models.Model):
     def no_free_transcations(self):
         return int(self.unused_credits / settings.REFERRALS_PER_TXN)
 
+    @property
+    def free_transaction(self):
+        return self.no_free_transcations > 0
+
     def __unicode__(self):
         return '{}'.format(self.user.email)
+
+    def redeem_transaction(self):
+        if self.no_free_transcations < 1:
+            raise ReferralException
+
+        if self.credits_gained < settings.REFERRALS_PER_TXN:
+            raise ReferralException
+
+        self.credits_redeemed += settings.REFERRALS_PER_TXN
+        self.save()
