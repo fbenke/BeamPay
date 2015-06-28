@@ -303,7 +303,7 @@ MAIL_PASSWORD_RESET_URL = '#!/auth/forgot/{}-{}/'
 
 # ==================== Referral Programs ====================
 
-NO_REFERRALS_REQUIRED = 5
+REFERRALS_PER_TXN = 5
 
 
 # ==================== IP-based blocking ====================

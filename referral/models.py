@@ -59,7 +59,7 @@ class Referral(models.Model):
     credits_redeemed = models.IntegerField(
         'Credits redeemed',
         default=0,
-        help_text='How often has this code been redeemed?'
+        help_text='How many of the credits have been redeemed?'
     )
 
     @property
@@ -68,7 +68,7 @@ class Referral(models.Model):
 
     @property
     def no_free_transcations(self):
-        return int(self.unused_credits / settings.NO_REFERRALS_REQUIRED)
+        return int(self.unused_credits / settings.REFERRALS_PER_TXN)
 
     def __unicode__(self):
         return '{}'.format(self.user.email)

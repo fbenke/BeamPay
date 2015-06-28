@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.views import APIView
@@ -49,9 +50,12 @@ class AddReferral(APIView):
                 raise APIException(constants.CODE_USED_ALREADY)
 
             user_referral.referred_by = referred_by
+            user_referral.credits_gained = settings.REFERRALS_PER_TXN
             user_referral.save()
 
             referred_by.referred_to.add(user_referral)
+            referred_by.credits_gained = referred_by.credits_gained + 1
+            referred_by.save()
 
             return Response()
 
