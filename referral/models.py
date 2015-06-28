@@ -5,6 +5,8 @@ from django.db import models
 from referral.utils import generate_referral_code
 from referral.exceptions import ReferralException
 
+from payment import constants
+
 
 def create_referral_code(user):
 
@@ -80,10 +82,10 @@ class Referral(models.Model):
 
     def redeem_transaction(self):
         if self.no_free_transcations < 1:
-            raise ReferralException
+            raise ReferralException(constants.REFERRAL_ERROR)
 
         if self.credits_gained < settings.REFERRALS_PER_TXN:
-            raise ReferralException
+            raise ReferralException(constants.REFERRAL_ERROR)
 
         self.credits_redeemed += settings.REFERRALS_PER_TXN
         self.save()

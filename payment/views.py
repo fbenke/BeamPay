@@ -17,6 +17,8 @@ from transaction import constants as t
 
 from payment import constants as p
 
+from referral.exceptions import ReferralException
+
 mod = __import__('transaction.models', fromlist=t.INSTANT_PAYMENT_MODELS)
 
 
@@ -54,7 +56,6 @@ class StripeCharge(GenericAPIView):
             if referral.free_transaction:
                 transaction.service_charge = 0
                 referral.redeem_transaction()
-                transaction.save()
 
             amount_usd = int(transaction.total_charge_usd * 100)
 
@@ -76,7 +77,8 @@ class StripeCharge(GenericAPIView):
 
             return Response(status=status.HTTP_201_CREATED)
 
-        except (CardError, InvalidRequestError, TypeError) as e:
+        except (CardError, InvalidRequestError, TypeError,
+                ReferralException) as e:
 
             return Response(
                 {'detail': e[0]},
