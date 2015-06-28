@@ -74,6 +74,14 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     exchange_rate_url.allow_tags = True
     exchange_rate_url.short_description = 'exchange rate'
 
+    def referral_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/referral/referral'
+        return '<a href="{}/{}/">{}</a>'.format(
+            path, obj.sender.referral.id, obj.sender.referral.no_free_transcations)
+
+    referral_url.allow_tags = True
+    referral_url.short_description = 'free transactions'
+
     def charge_usd(self, obj):
         return obj.charge_usd
 
@@ -96,7 +104,7 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     readonly_fields = (
         'id', 'sender_url', 'recipient_url', 'exchange_rate_url',
         'total_charge_usd', 'reference_number', 'last_changed',
-        'contact_method'
+        'contact_method', 'referral_url'
     )
 
     fieldsets = (
@@ -107,7 +115,7 @@ class GenericTransactionAdmin(admin.ModelAdmin):
         ('Pricing', {
             'fields': ('exchange_rate_url', 'amount_ghs',
                        'amount_usd', 'service_charge',
-                       'total_charge_usd')
+                       'total_charge_usd', 'referral_url')
         }),
         ('Payments', {
             'fields': ('payment_processor', 'payment_reference')
