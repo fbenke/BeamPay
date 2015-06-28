@@ -14,9 +14,8 @@ class ReferralFeeAdmin(admin.ModelAdmin):
 
     def user_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
-        return '<a href="{}/{}/">{} {} ({})</a>'.format(
-            path, obj.user.profile.id, obj.user.first_name,
-            obj.user.last_name, obj.user.profile.id
+        return '<a href="{}/{}/">{}</a>'.format(
+            path, obj.user.profile.id, obj.user.email
         )
 
     user_url.allow_tags = True
@@ -25,9 +24,9 @@ class ReferralFeeAdmin(admin.ModelAdmin):
     list_display = ('id', 'user_email', 'code',
                     'credits_gained', 'credits_redeemed')
 
-    readonly_fields = ('id', 'user_url', 'referred')
+    readonly_fields = ('id', 'user_url', 'referred_by', 'referred_to')
 
     fields = ('id', 'user_url', 'code', 'credits_gained',
-              'credits_redeemed', 'referred')
+              'credits_redeemed', 'referred_by', 'referred_to')
 
 admin.site.register(Referral, ReferralFeeAdmin)

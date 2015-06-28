@@ -7,6 +7,14 @@ from referral.utils import generate_referral_code
 
 def create_referral_code(user):
 
+    while True:
+        code = generate_referral_code()
+
+        try:
+            Referral.objects.get(code__iexact=code)
+        except Referral.DoesNotExist:
+            break
+
     referral = Referral.objects.create(
         user=user,
         code=generate_referral_code()
@@ -23,15 +31,22 @@ class Referral(models.Model):
         related_name='referral'
     )
 
-    referred = models.ManyToManyField(
+    referred_by = models.ForeignKey(
+        'self',
+        null=True
+    )
+
+    referred_to = models.ManyToManyField(
         'self',
         null=True,
+        symmetrical=False,
         related_name='referer'
     )
 
     code = models.CharField(
         'Referral code',
         max_length=50,
+        unique=True,
         help_text='Referral code'
     )
 
@@ -54,3 +69,6 @@ class Referral(models.Model):
     @property
     def no_free_transcations(self):
         return int(self.unused_credits / settings.NO_REFERRALS_REQUIRED)
+
+    def __unicode__(self):
+        return '{}'.format(self.user.email)

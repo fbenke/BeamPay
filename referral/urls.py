@@ -11,5 +11,10 @@ urlpatterns = patterns(
         r'^$',
         views.ViewReferral.as_view(),
         name='get'
+    ),
+    url(
+        r'^add/$',
+        views.AddReferral.as_view(),
+        name='add'
     )
 )
