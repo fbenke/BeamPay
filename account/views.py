@@ -499,7 +499,9 @@ class SigninFacebook(APIView):
                 response_dict = {
                     'id': user.id,
                     'new_user': new_user,
-                    'complete': user.profile.information_complete
+                    'complete': user.profile.information_complete,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name
                 }
 
                 if new_user:
