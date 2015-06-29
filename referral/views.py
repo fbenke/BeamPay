@@ -36,7 +36,7 @@ class ReferralStatus(APIView):
         user = self.request.user
         referral = Referral.objects.get(user=user)
         return Response(
-            {'free_txn': referral.free_transaction}
+            {'free_transaction': referral.free_transaction}
         )
 
 

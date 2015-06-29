@@ -66,7 +66,7 @@ class CreateGenericTransaction(GenericAPIView):
     def generate_response(self, transaction):
 
         return {
-            'txn_id': transaction.id,
+            'transaction_id': transaction.id,
             'reference_number': transaction.reference_number
         }
 
@@ -160,7 +160,7 @@ class ViewTransactions(ListAPIView):
             serializer_class = MODEL_2_SERIALIZER[entry.__class__]
             serializer = serializer_class(entry)
 
-            results.append({'txn_type': item_type, 'data': serializer.data})
+            results.append({'transaction_type': item_type, 'data': serializer.data})
 
         return results
 
