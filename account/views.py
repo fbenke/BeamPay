@@ -225,6 +225,8 @@ class Signin(APIView):
             return Response(
                 {'token': token.key,
                  'id': authenticated_user.id,
+                 'first_name': authenticated_user.first_name,
+                 'last_name': authenticated_user.last_name,
                  'complete': authenticated_user.profile.information_complete}
             )
 
