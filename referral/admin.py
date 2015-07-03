@@ -7,7 +7,10 @@ from models import Referral
 class ReferralFeeAdmin(admin.ModelAdmin):
 
     def user_email(self, obj):
-        return obj.user.email
+        try:
+            return obj.user.email
+        except AttributeError:
+            return ''
 
     user_email.allow_tags = True
     user_email.short_description = 'user'

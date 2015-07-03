@@ -319,8 +319,7 @@ COUNTRY_BLACKLIST = (
     'MM',  # Myanmar
 )
 
-# TODO: activate once the site mapping for Angular/Django is complete
-TOR_BLOCKING = False
+TOR_BLOCKING = True
 TOR_TIMEOUT = 5
 
 GEOIP_PATH = BASE_DIR('static', 'geo_data', 'GeoIP.dat')

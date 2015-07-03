@@ -31,6 +31,7 @@ class Referral(models.Model):
     user = models.OneToOneField(
         User,
         unique=True,
+        null=True,
         related_name='referral'
     )
 
@@ -78,7 +79,10 @@ class Referral(models.Model):
         return self.no_free_transcations > 0
 
     def __unicode__(self):
-        return '{}'.format(self.user.email)
+        try:
+            return '{}'.format(self.user.email)
+        except AttributeError:
+            return '{}'.format(self.code)
 
     def redeem_transaction(self):
         if self.no_free_transcations < 1:
