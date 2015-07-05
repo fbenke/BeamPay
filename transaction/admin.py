@@ -119,6 +119,9 @@ class GenericTransactionAdmin(admin.ModelAdmin):
         }),
         ('Payments', {
             'fields': ('payment_processor', 'payment_reference')
+        }),
+        ('Operations', {
+            'fields': ('remarks', )
         })
     )
 
@@ -156,7 +159,7 @@ class InstantPaymentAdmin(GenericTransactionAdmin):
         })
 
         self.fieldsets = (self.fieldsets[0], pricing_fieldset,
-                          self.fieldsets[2])
+                          self.fieldsets[2], self.fieldsets[3])
 
     def service_fee_url(self, obj):
         path = settings.API_BASE_URL + 'admin/pricing/servicefee'
@@ -182,7 +185,8 @@ class AirtimeTopupAdmin(InstantPaymentAdmin):
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
         addtl_fieldset = ('Airtime', {'fields': addtl_fieldset})
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2])
+                          self.fieldsets[1], self.fieldsets[2],
+                          self.fieldsets[3])
 
 
 class BillPaymentAdmin(InstantPaymentAdmin):
@@ -194,7 +198,8 @@ class BillPaymentAdmin(InstantPaymentAdmin):
         addtl_fieldset = ('bill_type', 'account_number', 'reference')
         addtl_fieldset = ('Bill', {'fields': addtl_fieldset})
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2])
+                          self.fieldsets[1], self.fieldsets[2],
+                          self.fieldsets[3])
 
 
 class ValetAdmin(GenericTransactionAdmin):
@@ -206,7 +211,8 @@ class ValetAdmin(GenericTransactionAdmin):
         addtl_fieldset = ('description', )
         addtl_fieldset = ('Valet', {'fields': addtl_fieldset})
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2])
+                          self.fieldsets[1], self.fieldsets[2],
+                          self.fieldsets[3])
 
 
 class SchoolFeeAdmin(GenericTransactionAdmin):
@@ -218,7 +224,8 @@ class SchoolFeeAdmin(GenericTransactionAdmin):
         addtl_fieldset = ('ward_name', 'school', 'additional_info')
         addtl_fieldset = ('School Fees', {'fields': addtl_fieldset})
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2])
+                          self.fieldsets[1], self.fieldsets[2],
+                          self.fieldsets[3])
 
 
 class GiftAdmin(GenericTransactionAdmin):
@@ -231,7 +238,8 @@ class GiftAdmin(GenericTransactionAdmin):
                           'delivery_time', 'additional_info')
         addtl_fieldset = ('Gift', {'fields': addtl_fieldset})
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2])
+                          self.fieldsets[1], self.fieldsets[2],
+                          self.fieldsets[3])
 
 admin.site.register(models.AirtimeTopup, AirtimeTopupAdmin)
 admin.site.register(models.ValetTransaction, ValetAdmin)

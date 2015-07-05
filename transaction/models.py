@@ -114,6 +114,13 @@ class AbstractTransaction(models.Model):
         help_text='Last changed'
     )
 
+    remarks = models.TextField(
+        'Remarks',
+        blank=True,
+        help_text='Remarks about fulfillment of the transaction,\
+                   not to be displayed to customer.'
+    )
+
     def save(self, *args, **kwargs):
         self.last_changed = timezone.now()
         super(AbstractTransaction, self).save(*args, **kwargs)
