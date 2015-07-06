@@ -6,7 +6,6 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.renderers import JSONRenderer
 
 from beam_value.permissions import IsNoAdmin
 from beam_value.utils.ip_analysis import country_blocked, is_tor_node,\
@@ -151,7 +150,8 @@ class ViewTransactions(ListAPIView):
             airtime, bills, school_fees, valet, gifts)
         )
 
-        sorted_list = sorted(results_list, key=lambda instance: instance.last_changed)
+        sorted_list = sorted(
+            results_list, key=lambda instance: instance.last_changed, reverse=True)
 
         results = list()
 
