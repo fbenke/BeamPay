@@ -138,7 +138,7 @@ class ViewTransactions(ListAPIView):
     serializer_class = serializers.TransactionSerializer
     paginate_by = 20
 
-    def get_queryset(self):
+    def get(self, request, *args, **kwargs):
 
         user = self.request.user
         airtime = models.AirtimeTopup.objects.filter(sender=user)
@@ -161,9 +161,9 @@ class ViewTransactions(ListAPIView):
             serializer_class = MODEL_2_SERIALIZER[entry.__class__]
             serializer = serializer_class(entry)
 
-            results.append({'transaction_type': item_type, 'data': JSONRenderer().render(serializer.data)})
+            results.append({'transaction_type': item_type, 'data': serializer.data})
 
-        return results
+        return Response(results)
 
 
 class GetTransaction(RetrieveAPIView):
