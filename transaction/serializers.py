@@ -157,7 +157,7 @@ class CreateGiftOrderSerializer(GenericTransactionSerializer):
 
 
 class TransactionSerializer(serializers.Serializer):
-    txn_type = serializers.CharField(max_length=20)
+    transaction_type = serializers.CharField(max_length=20)
     data = serializers.CharField(max_length=10000)
 
 
