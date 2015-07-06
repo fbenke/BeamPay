@@ -124,18 +124,18 @@ class CreateGiftOrder(CreateGenericTransaction):
 
 
 MODEL_2_SERIALIZER = {
-    models.AirtimeTopup: serializers.AirtimeSerializer,
-    models.BillPayment: serializers.BillPaymentSerializer,
-    models.SchoolFeePayment: serializers.SchoolFeeSerializer,
-    models.Gift: serializers.GiftSerializer,
-    models.ValetTransaction: serializers.ValetSerializer
+    models.AirtimeTopup: serializers.ViewAirtimeSerializer,
+    models.BillPayment: serializers.ViewBillPaymentSerializer,
+    models.SchoolFeePayment: serializers.ViewSchoolFeeSerializer,
+    models.Gift: serializers.ViewGiftSerializer,
+    models.ValetTransaction: serializers.ViewValetSerializer
 }
 
 
 class ViewTransactions(ListAPIView):
 
     permission_classes = (IsAuthenticated, IsNoAdmin)
-    serializer_class = serializers.TransactionSerializer
+    serializer_class = serializers.GenericListItemSerializer
     paginate_by = 20
 
     def get(self, request, *args, **kwargs):

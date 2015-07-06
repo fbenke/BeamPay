@@ -30,7 +30,7 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = read_only_fields
 
 
-class GenericTransactionSerializer(serializers.ModelSerializer):
+class GenericCreateTransactionSerializer(serializers.ModelSerializer):
 
     recipient = RecipientSerializer(many=False, required=False)
     recipient_id = serializers.IntegerField(required=False)
@@ -90,7 +90,7 @@ class GenericTransactionSerializer(serializers.ModelSerializer):
         return transaction
 
 
-class InstantPaymentSerializer(GenericTransactionSerializer):
+class CreateInstantPaymentSerializer(GenericCreateTransactionSerializer):
 
     def create(self, validated_data):
 
@@ -120,14 +120,14 @@ class InstantPaymentSerializer(GenericTransactionSerializer):
         return transaction
 
 
-class CreateAirtimeTopupSerializer(InstantPaymentSerializer):
+class CreateAirtimeTopupSerializer(CreateInstantPaymentSerializer):
 
     class Meta:
         model = models.AirtimeTopup
         fields = common_serializer_fields + ('phone_number', 'network')
 
 
-class CreateBillPaymentSerializer(InstantPaymentSerializer):
+class CreateBillPaymentSerializer(CreateInstantPaymentSerializer):
 
     class Meta:
         model = models.BillPayment
@@ -135,14 +135,14 @@ class CreateBillPaymentSerializer(InstantPaymentSerializer):
             'account_number', 'bill_type', 'reference')
 
 
-class CreateValetSerializer(GenericTransactionSerializer):
+class CreateValetSerializer(GenericCreateTransactionSerializer):
 
     class Meta:
         model = models.ValetTransaction
         fields = common_serializer_fields + ('description', )
 
 
-class CreateSchoolFeeSerializer(GenericTransactionSerializer):
+class CreateSchoolFeeSerializer(GenericCreateTransactionSerializer):
 
     class Meta:
         model = models.SchoolFeePayment
@@ -150,7 +150,7 @@ class CreateSchoolFeeSerializer(GenericTransactionSerializer):
             'ward_name', 'school', 'additional_info')
 
 
-class CreateGiftOrderSerializer(GenericTransactionSerializer):
+class CreateGiftOrderSerializer(GenericCreateTransactionSerializer):
 
     class Meta:
         model = models.Gift
@@ -158,41 +158,46 @@ class CreateGiftOrderSerializer(GenericTransactionSerializer):
             'gift_type', 'delivery_address', 'delivery_time', 'additional_info')
 
 
-class TransactionSerializer(serializers.Serializer):
+class GenericListItemSerializer(serializers.Serializer):
     transaction_type = serializers.CharField(max_length=20)
     data = serializers.CharField(max_length=10000)
 
 
-class AirtimeSerializer(serializers.ModelSerializer):
+class ViewAirtimeSerializer(serializers.ModelSerializer):
     recipient = RecipientSerializer(many=False)
+    total_charge_usd = serializers.FloatField()
 
     class Meta:
         model = models.AirtimeTopup
 
 
-class BillPaymentSerializer(serializers.ModelSerializer):
+class ViewBillPaymentSerializer(serializers.ModelSerializer):
     recipient = RecipientSerializer(many=False)
+    total_charge_usd = serializers.FloatField()
 
     class Meta:
         model = models.BillPayment
 
 
-class SchoolFeeSerializer(serializers.ModelSerializer):
+class ViewSchoolFeeSerializer(serializers.ModelSerializer):
     recipient = RecipientSerializer(many=False)
+    total_charge_usd = serializers.FloatField()
 
     class Meta:
         model = models.SchoolFeePayment
 
 
-class GiftSerializer(serializers.ModelSerializer):
+class ViewGiftSerializer(serializers.ModelSerializer):
     recipient = RecipientSerializer(many=False)
+    total_charge_usd = serializers.FloatField()
 
     class Meta:
         model = models.Gift
 
 
-class ValetSerializer(serializers.ModelSerializer):
+class ViewValetSerializer(serializers.ModelSerializer):
     recipient = RecipientSerializer(many=False)
+    total_charge_usd = serializers.FloatField()
 
     class Meta:
         model = models.ValetTransaction
