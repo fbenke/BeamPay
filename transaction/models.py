@@ -326,6 +326,7 @@ class Gift(AbstractTransaction):
     delivery_time = models.DateTimeField(
         'Delivery date and time',
         blank=True,
+        null=True,
         help_text='Delivery date and time'
     )
 
