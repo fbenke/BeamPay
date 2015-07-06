@@ -17,7 +17,9 @@ from account import constants as c
 from transaction import constants as t
 
 
-common_serializer_fields = ('recipient', 'recipient_id', 'preferred_contact_method')
+common_serializer_fields = (
+    'recipient', 'recipient_id', 'preferred_contact_method', 'amount_ghs'
+)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -122,7 +124,7 @@ class CreateAirtimeTopupSerializer(InstantPaymentSerializer):
 
     class Meta:
         model = models.AirtimeTopup
-        fields = common_serializer_fields + ('phone_number', 'network', 'amount_ghs')
+        fields = common_serializer_fields + ('phone_number', 'network')
 
 
 class CreateBillPaymentSerializer(InstantPaymentSerializer):
@@ -130,7 +132,7 @@ class CreateBillPaymentSerializer(InstantPaymentSerializer):
     class Meta:
         model = models.BillPayment
         fields = common_serializer_fields + (
-            'account_number', 'amount_ghs', 'bill_type', 'reference')
+            'account_number', 'bill_type', 'reference')
 
 
 class CreateValetSerializer(GenericTransactionSerializer):
