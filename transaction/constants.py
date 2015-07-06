@@ -12,6 +12,16 @@ PROCESSED = 'PROC'  # Fulfillment completed by Beam
 CANCELLED = 'CANC'  # Could not be completed
 INVALID = 'INVD'  # Error during payment
 
+TRANSACTION_STATES = (
+    INIT,
+    GATHERING_INFO,
+    READY_FOR_PAYMENT,
+    PAID,
+    PROCESSED,
+    CANCELLED,
+    INVALID
+)
+
 # Telco Providers
 VODAFONE = 'VOD'
 AIRTEL = 'AIR'

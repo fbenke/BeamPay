@@ -139,9 +139,10 @@ class ViewTransactions(ListAPIView):
 
     def get(self, request, *args, **kwargs):
 
+        states = list(set(constants.TRANSACTION_STATES) - set((constants.INIT,)))
         user = self.request.user
-        airtime = models.AirtimeTopup.objects.filter(sender=user)
-        bills = models.BillPayment.objects.filter(sender=user)
+        airtime = models.AirtimeTopup.objects.filter(sender=user, state__in=states)
+        bills = models.BillPayment.objects.filter(sender=user, state__in=states)
         school_fees = models.SchoolFeePayment.objects.filter(sender=user)
         gifts = models.Gift.objects.filter(sender=user)
         valet = models.ValetTransaction.objects.filter(sender=user)
