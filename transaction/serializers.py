@@ -22,11 +22,11 @@ common_serializer_fields = (
 )
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class ViewCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Comment
-        read_only_fields = ('timestamp', 'comment')
+        read_only_fields = ('author', 'timestamp', 'comment')
         fields = read_only_fields
 
 

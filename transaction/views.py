@@ -188,7 +188,24 @@ class GetTransaction(RetrieveAPIView):
             serializer_class = MODEL_2_SERIALIZER[txn_class]
             serializer = serializer_class(transaction)
 
-            return Response(serializer.data)
+            transaction_data = serializer.data
+
+            # gater and deserialize comments
+            comments = models.Comment.objects.filter(
+                content_type__name='valet transaction',
+                object_id=transaction.id
+            )
+
+            serializer_class = serializers.ViewCommentSerializer
+            comment_data = []
+
+            for c in comments:
+                serializer = serializer_class(c)
+                comment_data.append(serializer.data)
+
+            transaction_data['comments'] = comment_data
+
+            return Response(transaction_data)
 
         except (ObjectDoesNotExist, KeyError):
 
