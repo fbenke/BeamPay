@@ -268,7 +268,7 @@ else:
     SENDGRID_USER = os.environ.get('SENDGRID_USERNAME')
     SENDGRID_PASSWORD = os.environ.get('SENDGRID_PASSWORD')
 
-BEAM_MAIL_ADDRESS = 'Beam <hello@beampay.co>'
+BEAM_MAIL_ADDRESS = 'Beam Pay <hello@beampay.co>'
 BEAM_SUPPORT_MAIL_ADDRESS = 'hello@beampay.co'
 # ==================== User Email templates ====================
 
