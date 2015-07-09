@@ -12,6 +12,9 @@ from account import constants as c
 class BeamProfile(UserenaBaseProfile):
     ''' represents a sender user profile '''
 
+    class Meta:
+        ordering = ['-user_id']
+
     CONTACT_METHOD_CHOICES = (
         (c.PHONE, 'phone call'),
         (c.EMAIL, 'email'),

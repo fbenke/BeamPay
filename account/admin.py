@@ -49,6 +49,8 @@ class BeamProfileAdmin(admin.ModelAdmin):
 
     )
 
+    search_fields = ('user_id', 'user_email')
+
     list_display = ('user_id', 'user_email', 'country')
 
     list_display_links = ('user_email', )
