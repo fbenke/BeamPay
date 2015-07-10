@@ -170,9 +170,11 @@ class CountryField(serializers.Field):
 
 class ProfileSerializer(serializers.ModelSerializer):
 
+    information_complete = serializers.BooleanField()
+
     class Meta:
         model = models.BeamProfile
-        read_only_fields = ('gender',)
+        read_only_fields = ('gender', 'information_complete')
         read_and_write_fields = (
             'date_of_birth', 'phone_number', 'street', 'city',
             'post_code', 'country', 'preferred_contact_method',
