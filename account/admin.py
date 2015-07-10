@@ -30,7 +30,8 @@ class BeamProfileAdmin(admin.ModelAdmin):
     readonly_fields = (
         'user_url', 'user_email', 'name', 'street', 'city', 'post_code',
         'country', 'accepted_privacy_policy', 'date_of_birth', 'phone_number',
-        'preferred_contact_method', 'gender', 'facebook_link'
+        'preferred_contact_method', 'preferred_contact_details', 'gender',
+        'facebook_link'
     )
 
     fieldsets = (
@@ -39,7 +40,8 @@ class BeamProfileAdmin(admin.ModelAdmin):
         }),
         ('Profile', {
             'fields': ('street', 'city', 'post_code', 'country',
-                       'date_of_birth', 'phone_number', 'preferred_contact_method')
+                       'date_of_birth', 'phone_number', 'preferred_contact_method',
+                       'preferred_contact_details')
         }),
         ('Misc', {
             'classes': ('collapse',),

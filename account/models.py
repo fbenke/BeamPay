@@ -37,7 +37,7 @@ class BeamProfile(UserenaBaseProfile):
 
     phone_number = models.CharField(
         'Phone Number',
-        max_length=15,
+        max_length=20,
         blank=True,
         help_text='Phone number'
     )
@@ -76,6 +76,13 @@ class BeamProfile(UserenaBaseProfile):
         choices=CONTACT_METHOD_CHOICES,
         default=c.PHONE,
         help_text='Preferred Contact Method'
+    )
+
+    preferred_contact_details = models.CharField(
+        'Preferred Contact Details',
+        max_length=20,
+        blank=True,
+        help_text='Preferred Contact Details'
     )
 
     accepted_privacy_policy = models.BooleanField(

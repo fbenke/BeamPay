@@ -18,7 +18,8 @@ from transaction import constants as t
 
 
 common_serializer_fields = (
-    'recipient', 'recipient_id', 'preferred_contact_method', 'amount_ghs'
+    'recipient', 'recipient_id', 'preferred_contact_method',
+    'preferred_contact_details', 'amount_ghs'
 )
 
 
@@ -35,6 +36,7 @@ class GenericCreateTransactionSerializer(serializers.ModelSerializer):
     recipient = RecipientSerializer(many=False, required=False)
     recipient_id = serializers.IntegerField(required=False)
     preferred_contact_method = serializers.CharField(required=False)
+    preferred_contact_details = serializers.CharField(required=False)
 
     def _get_recipient(self, validated_data, user):
 
@@ -58,13 +60,24 @@ class GenericCreateTransactionSerializer(serializers.ModelSerializer):
 
     def _update_contact_method(self, validated_data, user):
 
-        if validated_data.get('preferred_contact_method', None):
+        try:
+            contact_method = validated_data.pop('preferred_contact_method')
+        except KeyError:
+            contact_method = None
 
-            if validated_data.get('preferred_contact_method') not in c.CONTACT_METHODS:
+        try:
+            contact_details = validated_data.pop('preferred_contact_details')
+        except KeyError:
+            contact_details = None
+
+        if contact_method and contact_details:
+
+            if contact_method not in c.CONTACT_METHODS:
                 raise APIException(constants.INVALID_PARAMETERS)
 
-            user.profile.preferred_contact_method = validated_data.pop(
-                'preferred_contact_method')
+            user.profile.preferred_contact_method = contact_method
+            user.profile.preferred_contact_details = contact_details
+
             user.profile.save()
 
     def _initial_values(self, transaction):

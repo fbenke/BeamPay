@@ -175,7 +175,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('gender',)
         read_and_write_fields = (
             'date_of_birth', 'phone_number', 'street', 'city',
-            'post_code', 'country', 'preferred_contact_method'
+            'post_code', 'country', 'preferred_contact_method',
+            'preferred_contact_details'
         )
 
         fields = read_only_fields + read_and_write_fields
@@ -201,20 +202,33 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
 
-        instance.first_name = validated_data.get('first_name', instance.first_name)
-        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.first_name = validated_data.get(
+            'first_name', instance.first_name)
+        instance.last_name = validated_data.get(
+            'last_name', instance.last_name)
 
         if validated_data.get('profile'):
 
             profile = validated_data.get('profile')
 
-            instance.profile.date_of_birth = profile.get('date_of_birth', instance.profile.date_of_birth)
-            instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
-            instance.profile.country = profile.get('country', instance.profile.country)
-            instance.profile.street = profile.get('street', instance.profile.street)
-            instance.profile.city = profile.get('city', instance.profile.city)
-            instance.profile.post_code = profile.get('post_code', instance.profile.post_code)
-            instance.profile.preferred_contact_method = profile.get('preferred_contact_method', instance.profile.preferred_contact_method)
+            instance.profile.date_of_birth = profile.get(
+                'date_of_birth', instance.profile.date_of_birth)
+            instance.profile.phone_number = profile.get(
+                'phone_number', instance.profile.phone_number)
+            instance.profile.country = profile.get(
+                'country', instance.profile.country)
+            instance.profile.street = profile.get(
+                'street', instance.profile.street)
+            instance.profile.city = profile.get(
+                'city', instance.profile.city)
+            instance.profile.post_code = profile.get(
+                'post_code', instance.profile.post_code)
+            instance.profile.preferred_contact_method = profile.get(
+                'preferred_contact_method',
+                instance.profile.preferred_contact_method)
+            instance.profile.preferred_contact_details = profile.get(
+                'preferred_contact_details',
+                instance.profile.preferred_contact_details)
 
             instance.profile.save()
 
