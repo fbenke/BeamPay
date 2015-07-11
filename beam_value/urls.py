@@ -29,13 +29,13 @@ urlpatterns = patterns(
         RedirectView.as_view(url=settings.STATIC_URL + 'img/favicon.png')
     ),
     url(
-        r'^share_mail/$',
-        views.ShareViaEmailView.as_view(),
-        name='share_via_email'
-    ),
-    url(
         r'^admin/',
         include(admin.site.urls)
+    ),
+    url(
+        r'^api/v1/share_mail/$',
+        views.ShareViaEmailView.as_view(),
+        name='share_via_email'
     ),
     url(
         r'^api/v1/account/',
