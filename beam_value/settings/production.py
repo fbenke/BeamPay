@@ -272,6 +272,10 @@ BEAM_MAIL_ADDRESS = 'Beam Pay <hello@beampay.co>'
 BEAM_SUPPORT_MAIL_ADDRESS = 'hello@beampay.co'
 # ==================== User Email templates ====================
 
+MAIL_SHARE_SUBJECT = 'emails/share_subject.txt'
+MAIL_SHARE_TEXT = 'emails/share_message.txt'
+MAIL_SHARE_HTML = 'emails/share_message.html'
+
 MAIL_ACTIVATION_SUBJECT = 'userena/emails/activation_email_subject.txt'
 MAIL_ACTIVATION_TEXT = 'userena/emails/activation_email_message.txt'
 MAIL_ACTIVATION_HTML = 'userena/emails/activation_email_message.html'

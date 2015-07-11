@@ -3,6 +3,8 @@ from django.conf.urls import patterns, url, include
 from django.contrib import admin
 from django.views.generic import TemplateView, RedirectView
 
+from beam_value import views
+
 admin.autodiscover()
 
 urlpatterns = patterns(
@@ -25,6 +27,11 @@ urlpatterns = patterns(
     url(
         r'^favicon\.ico$',
         RedirectView.as_view(url=settings.STATIC_URL + 'img/favicon.png')
+    ),
+    url(
+        r'^share_mail/$',
+        views.ShareViaEmailView.as_view(),
+        name='share_via_email'
     ),
     url(
         r'^admin/',

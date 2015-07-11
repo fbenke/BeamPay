@@ -1,0 +1,5 @@
+Hi {{ first_name }},
+
+I thought you'd like to know about Beam  - a new way for Ghanaians abroad to care for loved ones back home by paying directly for utility bills, phone airtime credit, gifts, school fees and much more.
+
+Find out how: https://beampay.co
