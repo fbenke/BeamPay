@@ -38,7 +38,10 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     sender_url.short_description = 'sender'
 
     def contact_method(self, obj):
-        return obj.sender.profile.preferred_contact_method
+
+        return '{}: {}'.format(
+            obj.sender.profile.preferred_contact_method,
+            obj.sender.profile.preferred_contact_details)
 
     contact_method.allow_tags = True
     contact_method.short_description = 'contact via'
@@ -50,7 +53,8 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     sender_email.short_description = 'sender'
 
     def recipient_name(self, obj):
-        return '{} {}'.format(obj.recipient.first_name, obj.recipient.last_name)
+        return '{} {}'.format(
+            obj.recipient.first_name, obj.recipient.last_name)
 
     recipient_name.allow_tags = True
     recipient_name.short_description = 'recipient'
