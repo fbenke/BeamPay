@@ -4,7 +4,6 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 
 from transaction.forms import CommentInlineFormset
 from transaction import models
-from transaction import constants as c
 
 from pricing.models import get_current_exchange_rate
 
