@@ -173,12 +173,6 @@ class InstantPaymentAdmin(GenericTransactionAdmin):
     service_fee_url.allow_tags = True
     service_fee_url.short_description = 'service fee'
 
-    def save_model(self, request, obj, form, change):
-        super(InstantPaymentAdmin, self).save_model(request, obj, form, change)
-
-        if 'state' in form.changed_data and obj.state == c.PROCESSED:
-            obj.post_processed()
-
 
 class AirtimeTopupAdmin(InstantPaymentAdmin):
 

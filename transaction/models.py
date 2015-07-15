@@ -145,28 +145,7 @@ class AbstractTransaction(models.Model):
             return None
 
 
-class InstantPaymentTransaction(AbstractTransaction):
-
-    class Meta:
-        ordering = ['-last_changed']
-        abstract = True
-
-    def post_paid(self):
-
-        mails.send_mail(
-            subject_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_SUBJECT,
-            email_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_TEXT,
-            context={
-                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
-                'protocol': settings.PROTOCOL,
-                'id': self.id,
-                'type': str.lower(self.__class__.__name__)
-            },
-            to_email=mails.get_admin_mail_addresses()
-        )
-
-
-class AirtimeTopup(InstantPaymentTransaction):
+class AirtimeTopup(AbstractTransaction):
 
     NETWORK_CHOICES = (
         (c.VODAFONE, 'Vodafone'),
@@ -212,7 +191,7 @@ class AirtimeTopup(InstantPaymentTransaction):
         )
 
 
-class BillPayment(InstantPaymentTransaction):
+class BillPayment(AbstractTransaction):
 
     BILL_CHOICES = (
         (c.EGC_POSTPAID, c.EGC_POSTPAID_DESC),
