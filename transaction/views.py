@@ -43,6 +43,8 @@ class CreateGenericTransaction(GenericAPIView):
 
                 transaction = serializer.save(user=request.user)
 
+                self.post_created(transaction)
+
                 return Response(
                     self.generate_response(transaction),
                     status=status.HTTP_201_CREATED

@@ -173,7 +173,7 @@ class TransactionRequest(AbstractTransaction):
         abstract = True
 
     def post_created(self):
-
+        print "HEY"
         mails.send_mail(
             subject_template_name=settings.MAIL_NOTIFY_ADMIN_REQUEST_SUBJECT,
             email_template_name=settings.MAIL_NOTIFY_ADMIN_REQUEST_TEXT,
