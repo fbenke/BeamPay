@@ -1,0 +1,7 @@
+Dear Admin,
+
+There is a request for a  {{ type }} transaction waiting to be processed. Please go to {{ protocol }}://{{ domain }}/admin/transaction/{{ type }}/{{ id }}/.
+
+Sincerely,
+
+The SendGridBot

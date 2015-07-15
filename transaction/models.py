@@ -1,9 +1,11 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
 
+from beam_value.utils import mails
 
 from pricing.models import ExchangeRate, ServiceFee
 
@@ -143,7 +145,49 @@ class AbstractTransaction(models.Model):
             return None
 
 
-class AirtimeTopup(AbstractTransaction):
+class InstantPaymentTransaction(AbstractTransaction):
+
+    class Meta:
+        ordering = ['-last_changed']
+        abstract = True
+
+    def post_paid(self):
+
+        mails.send_mail(
+            subject_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_SUBJECT,
+            email_template_name=settings.MAIL_NOTIFY_ADMIN_PAID_TEXT,
+            context={
+                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
+                'protocol': settings.PROTOCOL,
+                'id': self.id,
+                'type': str.lower(self.__class__.__name__)
+            },
+            to_email=mails.get_admin_mail_addresses()
+        )
+
+
+class TransactionRequest(AbstractTransaction):
+
+    class Meta:
+        ordering = ['-last_changed']
+        abstract = True
+
+    def post_created(self):
+
+        mails.send_mail(
+            subject_template_name=settings.MAIL_NOTIFY_ADMIN_REQUEST_SUBJECT,
+            email_template_name=settings.MAIL_NOTIFY_ADMIN_REQUEST_TEXT,
+            context={
+                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
+                'protocol': settings.PROTOCOL,
+                'id': self.id,
+                'type': str.lower(self.__class__.__name__)
+            },
+            to_email=mails.get_admin_mail_addresses()
+        )
+
+
+class AirtimeTopup(InstantPaymentTransaction):
 
     NETWORK_CHOICES = (
         (c.VODAFONE, 'Vodafone'),
@@ -172,7 +216,7 @@ class AirtimeTopup(AbstractTransaction):
     )
 
 
-class BillPayment(AbstractTransaction):
+class BillPayment(InstantPaymentTransaction):
 
     BILL_CHOICES = (
         (c.EGC_POSTPAID, c.EGC_POSTPAID_DESC),
@@ -211,7 +255,7 @@ class BillPayment(AbstractTransaction):
     )
 
 
-class ValetTransaction(AbstractTransaction):
+class ValetTransaction(TransactionRequest):
 
     description = models.TextField(
         'Description',
@@ -220,7 +264,7 @@ class ValetTransaction(AbstractTransaction):
     )
 
 
-class SchoolFeePayment(AbstractTransaction):
+class SchoolFeePayment(TransactionRequest):
 
     ward_name = models.CharField(
         'Name of ward or student',
@@ -243,7 +287,7 @@ class SchoolFeePayment(AbstractTransaction):
     )
 
 
-class Gift(AbstractTransaction):
+class Gift(TransactionRequest):
 
     GIFT_CHOICES = (
         (c.CAKE, 'cake'),

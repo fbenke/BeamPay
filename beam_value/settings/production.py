@@ -301,9 +301,10 @@ MAIL_BILL_COMPLETE_SUBJECT = 'emails/bill_complete_subject.txt'
 MAIL_BILL_COMPLETE_TEXT = 'emails/bill_complete_message.txt'
 MAIL_BILL_COMPLETE_HTML = 'emails/bill_complete_message.html'
 
-
 MAIL_NOTIFY_ADMIN_PAID_SUBJECT = 'emails/transaction_paid_subject.txt'
 MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/transaction_paid_message.txt'
+MAIL_NOTIFY_ADMIN_REQUEST_SUBJECT = 'emails/transaction_request_message.txt'
+MAIL_NOTIFY_ADMIN_REQUEST_TEXT = 'emails/transaction_request_subject.txt'
 
 # User-Facing URLs in Email templates
 MAIL_ACTIVATION_URL = '#!/auth/activate/{}/'

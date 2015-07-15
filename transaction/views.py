@@ -70,12 +70,21 @@ class CreateGenericTransaction(GenericAPIView):
             'reference_number': transaction.reference_number
         }
 
+    def post_created(self, transaction):
+        pass
 
-class CreateInstantPayemt(CreateGenericTransaction):
+
+class CreateTransactionRequest(CreateGenericTransaction):
+
+    def post_created(self, transaction):
+        transaction.post_created()
+
+
+class CreateInstantPayment(CreateGenericTransaction):
 
     def check_parameters(self, request):
 
-        super(CreateInstantPayemt, self).check_parameters(request)
+        super(CreateInstantPayment, self).check_parameters(request)
 
         amount_ghs = request.data.get('amount_ghs', None)
         exchange_rate_id = request.data.get('exchange_rate_id', None)
@@ -91,33 +100,33 @@ class CreateInstantPayemt(CreateGenericTransaction):
 
     def generate_response(self, transaction):
 
-        response_dict = super(CreateInstantPayemt, self).generate_response(
+        response_dict = super(CreateInstantPayment, self).generate_response(
             transaction)
         response_dict['charge_usd'] = transaction.total_charge_usd
         return response_dict
 
 
-class CreateAirtimeTopup(CreateInstantPayemt):
+class CreateAirtimeTopup(CreateInstantPayment):
 
     serializer_class = serializers.CreateAirtimeTopupSerializer
 
 
-class CreateBillPayment(CreateInstantPayemt):
+class CreateBillPayment(CreateInstantPayment):
 
     serializer_class = serializers.CreateBillPaymentSerializer
 
 
-class CreateValetTransaction(CreateGenericTransaction):
+class CreateValetTransaction(CreateTransactionRequest):
 
     serializer_class = serializers.CreateValetSerializer
 
 
-class CreateSchoolFeePayment(CreateGenericTransaction):
+class CreateSchoolFeePayment(CreateTransactionRequest):
 
     serializer_class = serializers.CreateSchoolFeeSerializer
 
 
-class CreateGiftOrder(CreateGenericTransaction):
+class CreateGiftOrder(CreateTransactionRequest):
 
     serializer_class = serializers.CreateGiftOrderSerializer
 
