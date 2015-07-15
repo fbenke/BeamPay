@@ -1,7 +1,0 @@
-Hi {{ first_name }},
-
-The phone number {{ phone_number }} has just been topped up with {{ amount_ghs }} GHS.
-
-Sincerely,
-
-The Beam Team

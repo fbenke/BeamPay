@@ -1,11 +1,9 @@
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils import timezone
 
-from beam_value.utils import mails
 
 from pricing.models import ExchangeRate, ServiceFee
 
@@ -173,23 +171,6 @@ class AirtimeTopup(AbstractTransaction):
         help_text='Phone number of recipient'
     )
 
-    def post_processed(self):
-
-        context = {
-            'first_name': self.sender.first_name,
-            'amount_ghs': self.amount_ghs,
-            'phone_number': self.phone_number,
-        }
-
-        mails.send_mail(
-            subject_template_name=settings.MAIL_AIRTIME_COMPLETE_SUBJECT,
-            email_template_name=settings.MAIL_AIRTIME_COMPLETE_TEXT,
-            context=context,
-            from_email=settings.BEAM_MAIL_ADDRESS,
-            to_email=self.sender.email,
-            html_email_template_name=settings.MAIL_AIRTIME_COMPLETE_HTML
-        )
-
 
 class BillPayment(AbstractTransaction):
 
@@ -228,23 +209,6 @@ class BillPayment(AbstractTransaction):
         related_name='bill_payment',
         help_text='Service fee applied to this bill payment'
     )
-
-    def post_processed(self):
-
-        context = {
-            'first_name': self.sender.first_name,
-            'type': self.bill_type,
-            'account_number': self.account_number
-        }
-
-        mails.send_mail(
-            subject_template_name=settings.MAIL_BILL_COMPLETE_SUBJECT,
-            email_template_name=settings.MAIL_BILL_COMPLETE_TEXT,
-            context=context,
-            from_email=settings.BEAM_MAIL_ADDRESS,
-            to_email=self.sender.email,
-            html_email_template_name=settings.MAIL_BILL_COMPLETE_HTML
-        )
 
 
 class ValetTransaction(AbstractTransaction):
