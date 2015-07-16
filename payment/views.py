@@ -77,12 +77,19 @@ class StripeCharge(GenericAPIView):
 
             return Response(status=status.HTTP_201_CREATED)
 
-        except (CardError, InvalidRequestError, TypeError,
-                ReferralException) as e:
+        except (InvalidRequestError, TypeError, ReferralException) as e:
 
             return Response(
                 {'detail': e[0]},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        except CardError as e:
+
+            return Response(
+                {'detail': p.STRIPE_ERROR,
+                 'message': e[0]},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         except (ObjectDoesNotExist, TransactionException):
