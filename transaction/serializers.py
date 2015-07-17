@@ -122,11 +122,12 @@ class CreateInstantPaymentSerializer(GenericCreateTransactionSerializer):
             **validated_data
         )
 
-        transaction.amount_usd = round_amount(
-            transaction.amount_ghs / transaction.exchange_rate.usd_ghs)
+        amount_usd_unrounded = transaction.amount_ghs / transaction.exchange_rate.usd_ghs
+
+        transaction.amount_usd = round_amount(amount_usd_unrounded)
 
         transaction.service_charge = round_amount(
-            transaction.amount_usd * transaction.service_fee.percentual_fee +
+            amount_usd_unrounded * transaction.service_fee.percentual_fee +
             transaction.service_fee.fixed_fee)
 
         self._initial_values(transaction)
@@ -169,7 +170,9 @@ class CreateGiftOrderSerializer(GenericCreateTransactionSerializer):
     class Meta:
         model = models.Gift
         fields = common_serializer_fields + (
-            'gift_type', 'delivery_address', 'delivery_time', 'additional_info')
+            'gift_type', 'delivery_address', 'delivery_time',
+            'additional_info'
+        )
 
 
 class GenericListItemSerializer(serializers.Serializer):
