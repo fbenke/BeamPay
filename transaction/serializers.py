@@ -6,7 +6,7 @@ from beam_value.utils.exceptions import APIException
 
 from transaction import models
 from transaction import constants
-from transaction.utils import generate_reference_number
+from transaction.utils import generate_reference_number, round_amount
 
 from recipient.models import Recipient
 from recipient.serializers import RecipientSerializer
@@ -122,11 +122,12 @@ class CreateInstantPaymentSerializer(GenericCreateTransactionSerializer):
             **validated_data
         )
 
-        transaction.amount_usd = transaction.amount_ghs / \
-            transaction.exchange_rate.usd_ghs
+        transaction.amount_usd = round_amount(
+            transaction.amount_ghs / transaction.exchange_rate.usd_ghs)
 
-        transaction.service_charge = transaction.amount_usd * \
-            transaction.service_fee.percentual_fee + transaction.service_fee.fixed_fee
+        transaction.service_charge = round_amount(
+            transaction.amount_usd * transaction.service_fee.percentual_fee +
+            transaction.service_fee.fixed_fee)
 
         self._initial_values(transaction)
 
