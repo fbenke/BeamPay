@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin
 from django.conf import settings
 
 from userena.admin import UserenaAdmin
@@ -65,6 +64,7 @@ class CustomUserenaAdmin(UserenaAdmin):
 
     list_display = ('id', 'email', 'is_staff', 'is_active', 'date_joined')
     list_display_links = ('id', 'email')
+    ordering = ('-id',)
 
 try:
     admin.site.unregister(User)
@@ -91,14 +91,3 @@ try:
 except admin.sites.NotRegistered:
     pass
 admin.site.register(Token, CustomTokenAdmin)
-
-
-class CustomUserAdmin(UserAdmin):
-    list_display = ('id', 'email', 'is_staff', 'is_active', 'date_joined')
-    ordering = ('-id',)
-
-try:
-    admin.site.unregister(User)
-except admin.sites.NotRegistered:
-    pass
-admin.site.register(User, CustomUserAdmin)
