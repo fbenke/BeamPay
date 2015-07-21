@@ -36,7 +36,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('User', {
-            'fields': ('user_url', 'user_email', 'name')
+            'fields': ('user_url', 'user_email', 'name', 'trusted')
         }),
         ('Profile', {
             'fields': ('street', 'city', 'post_code', 'country',

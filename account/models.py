@@ -90,6 +90,12 @@ class BeamProfile(UserenaBaseProfile):
         default=True
     )
 
+    trusted = models.BooleanField(
+        'Trusted User',
+        default=False,
+        help_text='Trusted because we know that person or verified that person'
+    )
+
     gender = models.CharField(
         'Gender',
         max_length=15,
