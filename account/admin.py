@@ -62,7 +62,13 @@ admin.site.register(Profile, BeamProfileAdmin)
 
 class CustomUserenaAdmin(UserenaAdmin):
 
-    list_display = ('id', 'email', 'is_staff', 'is_active', 'date_joined')
+    def profile_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/account/beamprofile'
+        return '<a href="{}/{}/">{}</a>'.format(path, obj.profile.id, obj.profile.id)
+    profile_url.allow_tags = True
+    profile_url.short_description = 'profile'
+
+    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'date_joined')
     list_display_links = ('id', 'email')
     ordering = ('-id',)
 
