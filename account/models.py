@@ -80,7 +80,7 @@ class BeamProfile(UserenaBaseProfile):
 
     preferred_contact_details = models.CharField(
         'Preferred Contact Details',
-        max_length=20,
+        max_length=254,
         blank=True,
         help_text='Preferred Contact Details'
     )
