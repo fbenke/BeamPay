@@ -19,6 +19,7 @@ class RecipientAdmin(admin.ModelAdmin):
     )
 
     list_display = ('id', 'first_name', 'last_name', 'phone_number')
+    search_fields = ('phone_number', 'first_name', 'last_name')
 
     fieldsets = (
         (None, {
