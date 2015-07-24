@@ -10,6 +10,10 @@ from rest_framework.authtoken.admin import TokenAdmin
 from account.models import BeamProfile as Profile
 
 
+def beam_trust_status(user):
+    return user.profile.get_trust_status_display()
+
+
 class BeamProfileAdmin(admin.ModelAdmin):
 
     def user_url(self, obj):
@@ -36,7 +40,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('User', {
-            'fields': ('user_url', 'user_email', 'name', 'trusted')
+            'fields': ('user_url', 'user_email', 'name', 'trust_status')
         }),
         ('Profile', {
             'fields': ('street', 'city', 'post_code', 'country',
@@ -53,7 +57,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
 
     search_fields = ('user_id', 'user_email')
 
-    list_display = ('user_id', 'user_email', 'country')
+    list_display = ('user_id', 'user_email', 'country', 'trust_status')
 
     list_display_links = ('user_email', )
 
@@ -68,7 +72,7 @@ class CustomUserenaAdmin(UserenaAdmin):
     profile_url.allow_tags = True
     profile_url.short_description = 'profile'
 
-    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'date_joined')
+    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', beam_trust_status, 'date_joined')
     list_display_links = ('id', 'email')
     ordering = ('-id',)
 
