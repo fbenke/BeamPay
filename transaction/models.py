@@ -33,6 +33,7 @@ class AbstractTransaction(models.Model):
         (c.PAID, 'paid'),
         (c.PROCESSED, 'processed'),
         (c.CANCELLED, 'cancelled'),
+        (c.FRAUDULENT, 'fraudulent'),
         (c.INVALID, 'invalid')
     )
 
