@@ -74,6 +74,7 @@ class CustomUserenaAdmin(UserenaAdmin):
 
     list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', beam_trust_status, 'date_joined')
     list_display_links = ('id', 'email')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
     ordering = ('-id',)
 
 try:
