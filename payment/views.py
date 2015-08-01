@@ -86,6 +86,11 @@ class StripeCharge(GenericAPIView):
 
         except CardError as e:
 
+            transaction.payment_processor = t.STRIPE
+            transaction.state = t.INVALID
+            transaction.save()
+            transaction.add_status_change(t.INVALID)
+
             return Response(
                 {'detail': p.STRIPE_ERROR,
                  'message': e[0]},
