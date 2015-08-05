@@ -58,7 +58,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
     search_fields = ('user_id', 'user_email')
 
     # list_display = ('user_id', 'user_email', 'country', 'trust_status')
-    list_display = ('name', 'country', 'trust_status')
+    list_display = ('country', 'trust_status')
 
 admin.site.register(Profile, BeamProfileAdmin)
 
