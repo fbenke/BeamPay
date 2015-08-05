@@ -16,20 +16,20 @@ from account.models import BeamProfile as Profile
 
 class BeamProfileAdmin(admin.ModelAdmin):
 
-    # def user_url(self, obj):
-    #     path = settings.API_BASE_URL + 'admin/auth/user'
-    #     return '<a href="{}/{}/">{}</a>'.format(path, obj.user.id, obj.user.id)
-    # user_url.allow_tags = True
-    # user_url.short_description = 'user'
+    def user_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/auth/user'
+        return '<a href="{}/{}/">{}</a>'.format(path, obj.user.id, obj.user.id)
+    user_url.allow_tags = True
+    user_url.short_description = 'user'
 
-    # def user_email(self, obj):
-    #     return obj.user.email
+    def user_email(self, obj):
+        return obj.user.email
 
-    # def user_id(self, obj):
-    #     return obj.user.id
+    def user_id(self, obj):
+        return obj.user.id
 
-    # def name(self, obj):
-    #     return '{} {}'.format(obj.user.first_name, obj.user.last_name)
+    def name(self, obj):
+        return '{} {}'.format(obj.user.first_name, obj.user.last_name)
 
     readonly_fields = (
         'user_url', 'user_email', 'name', 'street', 'city', 'post_code',
@@ -51,34 +51,30 @@ class BeamProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('gender', 'facebook_link', 'accepted_privacy_policy')
         })
-
-
     )
 
     search_fields = ('user_id', 'user_email')
 
-    # list_display = ('user_id', 'user_email', 'country', 'trust_status')
-    list_display = ('country', 'trust_status')
+    list_display = ('user_id', 'user_email', 'country', 'trust_status')
 
 admin.site.register(Profile, BeamProfileAdmin)
 
 
 class CustomUserenaAdmin(UserenaAdmin):
 
-    # def profile_url(self, obj):
-    #     path = settings.API_BASE_URL + 'admin/account/beamprofile'
-    #     return '<a href="{}/{}/">{}</a>'.format(path, obj.profile.id, obj.profile.id)
+    def profile_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/account/beamprofile'
+        return '<a href="{}/{}/">{}</a>'.format(path, obj.profile.id, obj.profile.id)
 
-    # def beam_trust_status(self, obj):
-    #     return obj.profile.get_trust_status_display()
+    def beam_trust_status(self, obj):
+        return obj.profile.get_trust_status_display()
 
-    # profile_url.allow_tags = True
-    # profile_url.short_description = 'profile'
+    profile_url.allow_tags = True
+    profile_url.short_description = 'profile'
 
-    # list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'beam_trust_status', 'date_joined')
-    list_display = ('id', 'email', 'is_staff', 'is_active', 'date_joined')
+    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'beam_trust_status', 'date_joined')
     list_display_links = ('id', 'email')
-    # list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
     ordering = ('-id',)
 
 try:
