@@ -202,8 +202,9 @@ class GetTransaction(RetrieveAPIView):
             transaction_data = serializer.data
 
             # gater and deserialize comments
+            print constants.TXN_TYPE_2_MODEL[txn_type]
             comments = models.Comment.objects.filter(
-                content_type__name='valet transaction',
+                content_type__model=constants.TXN_TYPE_2_MODEL[txn_type].lower(),
                 object_id=transaction.id
             )
 
