@@ -10,8 +10,8 @@ from rest_framework.authtoken.admin import TokenAdmin
 from account.models import BeamProfile as Profile
 
 
-def beam_trust_status(user):
-    return user.profile.get_trust_status_display()
+# def beam_trust_status(user):
+#     return user.profile.get_trust_status_display()
 
 
 class BeamProfileAdmin(admin.ModelAdmin):
@@ -72,7 +72,7 @@ class CustomUserenaAdmin(UserenaAdmin):
     profile_url.allow_tags = True
     profile_url.short_description = 'profile'
 
-    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', beam_trust_status, 'date_joined')
+    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'date_joined')
     list_display_links = ('id', 'email')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
     ordering = ('-id',)
