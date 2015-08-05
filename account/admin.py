@@ -69,10 +69,14 @@ class CustomUserenaAdmin(UserenaAdmin):
     def profile_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
         return '<a href="{}/{}/">{}</a>'.format(path, obj.profile.id, obj.profile.id)
+
+    def beam_trust_status(user):
+        return user.profile.get_trust_status_display()
+
     profile_url.allow_tags = True
     profile_url.short_description = 'profile'
 
-    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'date_joined')
+    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'beam_trust_status', 'date_joined')
     list_display_links = ('id', 'email')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
     ordering = ('-id',)
