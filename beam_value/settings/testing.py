@@ -1,4 +1,4 @@
-from beam.settings.production import *
+from beam_value.settings.production import *
 
 import logging
 
@@ -9,3 +9,6 @@ REST_FRAMEWORK['DEFAULT_THROTTLE_RATES'] = {'anon': '100/second', }
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 
 logging.disable(logging.CRITICAL)
+
+#debug toolbar
+INSTALLED_APPS += ('debug_toolbar',)
