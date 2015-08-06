@@ -56,6 +56,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
     search_fields = ('user_id', 'user_email')
 
     list_display = ('user_id', 'user_email', 'country', 'trust_status')
+    list_per_page = 20
 
 admin.site.register(Profile, BeamProfileAdmin)
 
@@ -75,6 +76,7 @@ class CustomUserenaAdmin(UserenaAdmin):
     list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'beam_trust_status', 'date_joined')
     list_display_links = ('id', 'email')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
+    list_per_page = 20
     ordering = ('-id',)
 
 try:
@@ -93,6 +95,7 @@ class CustomTokenAdmin(TokenAdmin):
         return obj.user.id
 
     list_display = ('user_email', 'key', 'created')
+    list_per_page = 20
 
     readonly_fields = ('user_id', 'user_email', 'key')
     fields = readonly_fields
