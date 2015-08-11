@@ -26,7 +26,7 @@ class ExchangeRateAdmin(DoNotDeleteModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not obj.id:
-            end_previous_object(ExchangeRate)
+            end_previous_object(ExchangeRate, obj)
             obj.save()
 
 

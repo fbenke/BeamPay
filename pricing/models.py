@@ -30,8 +30,11 @@ def get_current_objects(cls):
 
 def end_previous_object(cls, obj):
     try:
-        previous_object = cls.objects.get(
-            end__isnull=True, service=obj.service)
+        if cls == ExchangeRate:
+            previous_object = cls.objects.get(end__isnull=True)
+        else:
+            previous_object = cls.objects.get(
+                end__isnull=True, service=obj.service)
         previous_object.end = timezone.now()
         previous_object.save()
     except ObjectDoesNotExist:
