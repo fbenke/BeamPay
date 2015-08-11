@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from beam_value.utils.log import log_error
 from pricing.exceptions import ObjectsDoNotExist
-from pricing.constants import PRICING_TYPE
+from pricing import constants as c
 
 
 def get_current_object(cls):
@@ -18,9 +18,10 @@ def get_current_object(cls):
 
 
 def get_current_objects(cls):
-    objs = cls.objects.filter(end_isnull=True)
+    objs = cls.objects.filter(end__isnull=True)
 
     if len(objs) < 2:
+        print objs
         msg = 'ERROR {} - No pricing object found.'.format(cls)
         log_error(msg)
         raise ObjectsDoNotExist(msg)
@@ -28,23 +29,25 @@ def get_current_objects(cls):
     return objs
 
 
-def end_previous_object(cls):
+def end_previous_object(cls, obj):
     try:
-        previous_object = cls.objects.get(end__isnull=True)
+        previous_object = cls.objects.get(
+            end__isnull=True, service=obj.service)
         previous_object.end = timezone.now()
         previous_object.save()
     except ObjectDoesNotExist:
-        if cls.objects.all().exists():
+        if cls.objects.filter(service=obj.service).exists():
             msg = 'ERROR {} - Failed to end previous pricing.'.format(cls)
             log_error(msg)
             raise ObjectDoesNotExist(msg)
+        pass
 
 
 def get_current_exchange_rate():
     return get_current_object(ExchangeRate)
 
 
-def get_current_service_fee():
+def get_current_service_fees():
     return get_current_objects(ServiceFee)
 
 
@@ -80,7 +83,8 @@ class ServiceFee(models.Model):
     service = models.CharField(
         'Service',
         max_length=10,
-        choices=PRICING_TYPE,
+        choices=c.PRICING_TYPE,
+        default=c.AIRTIME,
         help_text='The service which the fee is for.'
     )
 

@@ -3,7 +3,8 @@ from itertools import chain
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework import status
-from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import (
+    GenericAPIView, ListAPIView, RetrieveAPIView)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -14,10 +15,11 @@ from beam_value.utils.exceptions import APIException
 
 from account.utils import AccountException
 
-from pricing.models import get_current_exchange_rate, get_current_service_fee
+from pricing.models import get_current_exchange_rate, get_current_service_fees
 
 from transaction import serializers
 from transaction import constants
+from pricing import constants as p
 from transaction import models
 
 mod = __import__('transaction.models', fromlist=constants.TRANSACTION_MODELS)
@@ -50,7 +52,8 @@ class CreateGenericTransaction(GenericAPIView):
                     status=status.HTTP_201_CREATED
                 )
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except (AccountException, APIException) as e:
 
@@ -84,22 +87,6 @@ class CreateTransactionRequest(CreateGenericTransaction):
 
 class CreateInstantPayment(CreateGenericTransaction):
 
-    def check_parameters(self, request):
-
-        super(CreateInstantPayment, self).check_parameters(request)
-
-        amount_ghs = request.data.get('amount_ghs', None)
-        exchange_rate_id = request.data.get('exchange_rate_id', None)
-        service_fee_id = request.data.get('service_fee_id', None)
-
-        if not amount_ghs or not exchange_rate_id or not service_fee_id:
-            raise APIException(constants.INVALID_PARAMETERS)
-
-        # check if Exchange Rate or Service Charge has expired
-        if (get_current_exchange_rate().id != exchange_rate_id or
-                get_current_service_fee().id != service_fee_id):
-            raise APIException(constants.PRICING_EXPIRED)
-
     def generate_response(self, transaction):
 
         response_dict = super(CreateInstantPayment, self).generate_response(
@@ -112,10 +99,60 @@ class CreateAirtimeTopup(CreateInstantPayment):
 
     serializer_class = serializers.CreateAirtimeTopupSerializer
 
+    def check_parameters(self, request):
+
+        super(CreateInstantPayment, self).check_parameters(request)
+
+        amount_ghs = request.data.get('amount_ghs', None)
+        exchange_rate_id = request.data.get('exchange_rate_id', None)
+        service_fee_id = request.data.get('service_fee_id', None)
+
+        print service_fee_id
+
+        if not amount_ghs or not exchange_rate_id or not service_fee_id:
+            raise APIException(constants.INVALID_PARAMETERS)
+
+        # check if Exchange Rate or Service Charge has expired
+        service_fees = get_current_service_fees()
+        service_fee = None
+
+        for fee in service_fees:
+            if fee.service == p.AIRTIME:
+                service_fee = fee
+                break
+
+        if (get_current_exchange_rate().id != exchange_rate_id or
+                service_fee.id != service_fee_id):
+            raise APIException(constants.PRICING_EXPIRED)
+
 
 class CreateBillPayment(CreateInstantPayment):
 
     serializer_class = serializers.CreateBillPaymentSerializer
+
+    def check_parameters(self, request):
+
+        super(CreateInstantPayment, self).check_parameters(request)
+
+        amount_ghs = request.data.get('amount_ghs', None)
+        exchange_rate_id = request.data.get('exchange_rate_id', None)
+        service_fee_id = request.data.get('service_fee_id', None)
+
+        if not amount_ghs or not exchange_rate_id or not service_fee_id:
+            raise APIException(constants.INVALID_PARAMETERS)
+
+        # check if Exchange Rate or Service Charge has expired
+        service_fees = get_current_service_fees()
+        service_fee = None
+
+        for fee in service_fees:
+            if fee.service == p.BILL:
+                service_fee = fee
+                break
+
+        if (get_current_exchange_rate().id != exchange_rate_id or
+                service_fee.id != service_fee_id):
+            raise APIException(constants.PRICING_EXPIRED)
 
 
 class CreateValetTransaction(CreateTransactionRequest):
@@ -150,10 +187,13 @@ class ViewTransactions(ListAPIView):
 
     def get(self, request, *args, **kwargs):
 
-        states = list(set(constants.TRANSACTION_STATES) - set((constants.INIT,)))
+        states = list(
+            set(constants.TRANSACTION_STATES) - set((constants.INIT,)))
         user = self.request.user
-        airtime = models.AirtimeTopup.objects.filter(sender=user, state__in=states)
-        bills = models.BillPayment.objects.filter(sender=user, state__in=states)
+        airtime = models.AirtimeTopup.objects.filter(
+            sender=user, state__in=states)
+        bills = models.BillPayment.objects.filter(
+            sender=user, state__in=states)
         school_fees = models.SchoolFeePayment.objects.filter(sender=user)
         gifts = models.Gift.objects.filter(sender=user)
         valet = models.ValetTransaction.objects.filter(sender=user)
@@ -163,7 +203,8 @@ class ViewTransactions(ListAPIView):
         )
 
         sorted_list = sorted(
-            results_list, key=lambda instance: instance.last_changed, reverse=True)
+            results_list, key=lambda instance: instance.last_changed,
+            reverse=True)
 
         results = list()
 
@@ -173,7 +214,8 @@ class ViewTransactions(ListAPIView):
             serializer_class = MODEL_2_SERIALIZER[entry.__class__]
             serializer = serializer_class(entry)
 
-            results.append({'transaction_type': item_type, 'data': serializer.data})
+            results.append(
+                {'transaction_type': item_type, 'data': serializer.data})
 
         return Response(results)
 

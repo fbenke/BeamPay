@@ -11,10 +11,11 @@ from transaction.utils import generate_reference_number, round_amount
 from recipient.models import Recipient
 from recipient.serializers import RecipientSerializer
 
-from pricing.models import get_current_exchange_rate, get_current_service_fee
+from pricing.models import get_current_exchange_rate, get_current_service_fees
 
 from account import constants as c
 from transaction import constants as t
+from pricing import constants as p
 
 
 common_serializer_fields = (
@@ -48,7 +49,8 @@ class GenericCreateTransactionSerializer(serializers.ModelSerializer):
 
             try:
                 recipient_id = validated_data.pop('recipient_id')
-                recipient = Recipient.objects.get(user__id=user.id, id=recipient_id)
+                recipient = Recipient.objects.get(
+                    user__id=user.id, id=recipient_id)
 
             except ObjectDoesNotExist:
                 raise APIException(constants.INVALID_PARAMETERS)
@@ -103,7 +105,7 @@ class GenericCreateTransactionSerializer(serializers.ModelSerializer):
         return transaction
 
 
-class CreateInstantPaymentSerializer(GenericCreateTransactionSerializer):
+class CreateAirtimeTopupSerializer(GenericCreateTransactionSerializer):
 
     def create(self, validated_data):
 
@@ -112,7 +114,13 @@ class CreateInstantPaymentSerializer(GenericCreateTransactionSerializer):
         self._update_contact_method(validated_data, user)
 
         exchange_rate = get_current_exchange_rate()
-        service_fee = get_current_service_fee()
+        service_fees = get_current_service_fees()
+        service_fee = None
+
+        for fee in service_fees:
+            if fee.service == p.AIRTIME:
+                service_fee = fee
+                break
 
         transaction = self.Meta.model.objects.create(
             sender=user,
@@ -122,27 +130,61 @@ class CreateInstantPaymentSerializer(GenericCreateTransactionSerializer):
             **validated_data
         )
 
-        amount_usd_unrounded = transaction.amount_ghs / transaction.exchange_rate.usd_ghs
+        amount_usd = round_amount(
+            transaction.amount_ghs / transaction.exchange_rate.usd_ghs)
 
-        transaction.amount_usd = round_amount(amount_usd_unrounded)
+        transaction.amount_usd = round_amount(amount_usd)
 
         transaction.service_charge = round_amount(
-            amount_usd_unrounded * transaction.service_fee.percentual_fee +
+            amount_usd * transaction.service_fee.percentual_fee +
             transaction.service_fee.fixed_fee)
 
         self._initial_values(transaction)
 
         return transaction
 
-
-class CreateAirtimeTopupSerializer(CreateInstantPaymentSerializer):
-
     class Meta:
         model = models.AirtimeTopup
         fields = common_serializer_fields + ('phone_number', 'network')
 
 
-class CreateBillPaymentSerializer(CreateInstantPaymentSerializer):
+class CreateBillPaymentSerializer(GenericCreateTransactionSerializer):
+
+    def create(self, validated_data):
+
+        user = validated_data.pop('user')
+        recipient = self._get_recipient(validated_data, user)
+        self._update_contact_method(validated_data, user)
+
+        exchange_rate = get_current_exchange_rate()
+        service_fees = get_current_service_fees()
+        service_fee = None
+
+        for fee in service_fees:
+            if fee.service == p.BILL:
+                service_fee = fee
+                break
+
+        transaction = self.Meta.model.objects.create(
+            sender=user,
+            exchange_rate=exchange_rate,
+            service_fee=service_fee,
+            recipient=recipient,
+            **validated_data
+        )
+
+        amount_usd = round_amount(
+            transaction.amount_ghs / transaction.exchange_rate.usd_ghs)
+
+        transaction.amount_usd = round_amount(amount_usd)
+
+        transaction.service_charge = round_amount(
+            amount_usd * transaction.service_fee.percentual_fee +
+            transaction.service_fee.fixed_fee)
+
+        self._initial_values(transaction)
+
+        return transaction
 
     class Meta:
         model = models.BillPayment

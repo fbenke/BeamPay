@@ -6,6 +6,7 @@ from rest_framework import status
 
 from pricing.models import get_current_exchange_rate, get_current_service_fees
 from pricing.constants import AIRTIME, BILL
+from pricing.exceptions import ObjectsDoNotExist
 
 
 class PricingCurrent(APIView):
@@ -20,7 +21,8 @@ class PricingCurrent(APIView):
             response_dict['usd_ghs'] = exchange_rate.usd_ghs
 
             service_fees = get_current_service_fees()
-            response_dict['service_fees'] = {}
+            response_dict['airtime'] = {}
+            response_dict['bill'] = {}
 
             for service_fee in service_fees:
                 if service_fee.service == AIRTIME:
@@ -33,6 +35,9 @@ class PricingCurrent(APIView):
                     response_dict['bill']['percentual_fee'] = service_fee.percentual_fee
 
         except ObjectDoesNotExist:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except ObjectsDoNotExist:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(response_dict)

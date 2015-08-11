@@ -42,7 +42,7 @@ class ServiceFeeAdmin(DoNotDeleteModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not obj.id:
-            end_previous_object(ServiceFee)
+            end_previous_object(ServiceFee, obj)
             obj.save()
 
 admin.site.register(ExchangeRate, ExchangeRateAdmin)
