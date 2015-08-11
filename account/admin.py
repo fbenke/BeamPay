@@ -10,8 +10,8 @@ from rest_framework.authtoken.admin import TokenAdmin
 from account.models import BeamProfile as Profile
 
 
-def beam_trust_status(user):
-    return user.profile.get_trust_status_display()
+# def beam_trust_status(user):
+#     return user.profile.get_trust_status_display()
 
 
 class BeamProfileAdmin(admin.ModelAdmin):
@@ -51,15 +51,12 @@ class BeamProfileAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('gender', 'facebook_link', 'accepted_privacy_policy')
         })
-
-
     )
 
     search_fields = ('user_id', 'user_email')
 
     list_display = ('user_id', 'user_email', 'country', 'trust_status')
-
-    list_display_links = ('user_email', )
+    list_per_page = 20
 
 admin.site.register(Profile, BeamProfileAdmin)
 
@@ -69,12 +66,17 @@ class CustomUserenaAdmin(UserenaAdmin):
     def profile_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
         return '<a href="{}/{}/">{}</a>'.format(path, obj.profile.id, obj.profile.id)
+
+    def beam_trust_status(self, obj):
+        return obj.profile.get_trust_status_display()
+
     profile_url.allow_tags = True
     profile_url.short_description = 'profile'
 
-    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', beam_trust_status, 'date_joined')
+    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'beam_trust_status', 'date_joined')
     list_display_links = ('id', 'email')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
+    list_per_page = 20
     ordering = ('-id',)
 
 try:
@@ -93,6 +95,7 @@ class CustomTokenAdmin(TokenAdmin):
         return obj.user.id
 
     list_display = ('user_email', 'key', 'created')
+    list_per_page = 20
 
     readonly_fields = ('user_id', 'user_email', 'key')
     fields = readonly_fields

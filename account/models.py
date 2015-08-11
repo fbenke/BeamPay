@@ -91,11 +91,11 @@ class BeamProfile(UserenaBaseProfile):
     )
 
     trust_status = models.CharField(
-        'Trusted User',
+        'Trustworthiness',
         choices=c.TRUST_STATUSES,
         default=c.NEUTRAL,
         max_length=4,
-        help_text='Trusted because we know that person or verified that person'
+        help_text='Additional information on trustworthiness of this account'
     )
 
     gender = models.CharField(

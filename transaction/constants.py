@@ -11,6 +11,7 @@ PAID = 'PAID'  # Paid by sender
 PROCESSED = 'PROC'  # Fulfillment completed by Beam
 CANCELLED = 'CANC'  # Could not be completed
 INVALID = 'INVD'  # Error during payment
+FRAUDULENT = 'FRUD'  # Error during payment
 
 TRANSACTION_STATES = (
     INIT,
@@ -19,6 +20,7 @@ TRANSACTION_STATES = (
     PAID,
     PROCESSED,
     CANCELLED,
+    FRAUDULENT,
     INVALID
 )
 
