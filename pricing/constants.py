@@ -1,0 +1,7 @@
+AIRTIME = 'AIRTIME'
+BILL = 'BILL'
+
+PRICING_TYPE = (
+    (AIRTIME, AIRTIME),
+    (BILL, BILL)
+)

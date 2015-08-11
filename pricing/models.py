@@ -3,6 +3,8 @@ from django.db import models
 from django.utils import timezone
 
 from beam_value.utils.log import log_error
+from pricing.exceptions import ObjectsDoNotExist
+from pricing.constants import PRICING_TYPE
 
 
 def get_current_object(cls):
@@ -13,6 +15,17 @@ def get_current_object(cls):
         msg = 'ERROR {} - No pricing object found.'.format(cls)
         log_error(msg)
         raise ObjectDoesNotExist(msg)
+
+
+def get_current_objects(cls):
+    objs = cls.objects.filter(end_isnull=True)
+
+    if len(objs) < 2:
+        msg = 'ERROR {} - No pricing object found.'.format(cls)
+        log_error(msg)
+        raise ObjectsDoNotExist(msg)
+
+    return objs
 
 
 def end_previous_object(cls):
@@ -32,7 +45,7 @@ def get_current_exchange_rate():
 
 
 def get_current_service_fee():
-    return get_current_object(ServiceFee)
+    return get_current_objects(ServiceFee)
 
 
 class ExchangeRate(models.Model):
@@ -62,6 +75,13 @@ class ServiceFee(models.Model):
         'Start Time',
         auto_now_add=True,
         help_text='Time at which pricing structure came into effect'
+    )
+
+    service = models.CharField(
+        'Service',
+        max_length=10,
+        choices=PRICING_TYPE,
+        help_text='The service which the fee is for.'
     )
 
     end = models.DateTimeField(

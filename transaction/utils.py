@@ -1,4 +1,5 @@
 import random
+import math
 
 
 def generate_reference_number():
@@ -6,7 +7,7 @@ def generate_reference_number():
 
 
 def round_amount(amount):
-    return float(int(amount * 100)) / 100
+    return float(math.ceil(amount * 100)) / 100
 
 
 class TransactionException(Exception):
