@@ -38,7 +38,8 @@ class ServiceFeeAdmin(DoNotDeleteModelAdmin):
         else:
             return ('id', 'start', 'end')
 
-    list_display = ('id', 'start', 'end', 'fixed_fee', 'percentual_fee')
+    list_display = (
+        'id', 'service', 'start', 'end', 'fixed_fee', 'percentual_fee')
 
     def save_model(self, request, obj, form, change):
         if not obj.id:
