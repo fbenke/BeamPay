@@ -21,7 +21,6 @@ def get_current_objects(cls):
     objs = cls.objects.filter(end__isnull=True)
 
     if len(objs) < 2:
-        print objs
         msg = 'ERROR {} - No pricing object found.'.format(cls)
         log_error(msg)
         raise ObjectsDoNotExist(msg)

@@ -107,8 +107,6 @@ class CreateAirtimeTopup(CreateInstantPayment):
         exchange_rate_id = request.data.get('exchange_rate_id', None)
         service_fee_id = request.data.get('service_fee_id', None)
 
-        print service_fee_id
-
         if not amount_ghs or not exchange_rate_id or not service_fee_id:
             raise APIException(constants.INVALID_PARAMETERS)
 
@@ -244,7 +242,6 @@ class GetTransaction(RetrieveAPIView):
             transaction_data = serializer.data
 
             # gater and deserialize comments
-            print constants.TXN_TYPE_2_MODEL[txn_type]
             comments = models.Comment.objects.filter(
                 content_type__model=constants.TXN_TYPE_2_MODEL[txn_type].lower(),
                 object_id=transaction.id
