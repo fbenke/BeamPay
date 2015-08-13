@@ -8,7 +8,7 @@ from referral.exceptions import ReferralException
 from payment import constants
 
 
-def create_referral_code(user):
+def create_referral_code(user, referral_code=None):
 
     while True:
         code = generate_referral_code()
@@ -23,7 +23,17 @@ def create_referral_code(user):
         code=generate_referral_code()
     )
 
+    if referral_code:
+        try:
+            referred_by = Referral.objects.get(code=referral_code)
+            referral.referred_by = referred_by
+
+        except Referral.DoesNotExist:
+            pass
+
     referral.save()
+
+    return referral
 
 
 class Referral(models.Model):

@@ -11,7 +11,7 @@ from beam_value.utils.exceptions import APIException
 
 from referral import constants
 from referral import serializers
-from referral.models import Referral
+from referral.models import Referral, create_referral_code
 
 
 class ViewReferral(APIView):
@@ -20,11 +20,14 @@ class ViewReferral(APIView):
     permission_classes = (IsAuthenticated, IsNoAdmin)
 
     def get(self, request):
+        referral = None
+        try:
+            user = self.request.user
+            referral = Referral.objects.get(user=user)
+        except ObjectDoesNotExist:
+            referral = create_referral_code(self.request.user)
 
-        user = self.request.user
-        referral = Referral.objects.get(user=user)
         serializer = self.serializer_class(referral)
-
         return Response(serializer.data)
 
 
@@ -33,8 +36,13 @@ class ReferralStatus(APIView):
     permission_classes = (IsAuthenticated, IsNoAdmin)
 
     def get(self, request):
-        user = self.request.user
-        referral = Referral.objects.get(user=user)
+        referral = None
+        try:
+            user = self.request.user
+            referral = Referral.objects.get(user=user)
+        except ObjectDoesNotExist:
+            referral = create_referral_code(self.request.user)
+
         return Response(
             {'free_transaction': referral.free_transaction}
         )

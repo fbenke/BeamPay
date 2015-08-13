@@ -1,7 +1,8 @@
 from requests import HTTPError
 
 from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator as token_generator
+from django.contrib.auth.tokens import (
+    default_token_generator as token_generator)
 from django.contrib.auth.models import User
 from django.db import transaction as dbtransaction
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -88,9 +89,9 @@ class Signup(APIView):
             user = serializer.save()
 
             if user:
-
+                referral_code = request.data.get('referral_code', None)
                 send_activation_email(user)
-                create_referral_code(user)
+                create_referral_code(user, referral_code=referral_code)
 
                 return Response(status=status.HTTP_201_CREATED)
 
@@ -104,14 +105,29 @@ class Activation(APIView):
         activation_key = kwargs['activation_key']
 
         try:
-            if not UserenaSignup.objects.check_expired_activation(activation_key):
+            if not UserenaSignup.objects.check_expired_activation(
+                    activation_key):
 
                 user = UserenaSignup.objects.activate_user(activation_key)
 
                 # account successfully activated
                 if user:
                     token, created = Token.objects.get_or_create(user=user)
-                    return Response({'token': token.key, 'id': user.id}, status.HTTP_200_OK)
+
+                    if user.referral.referred_by:
+                        referral = user.referral
+                        referred_by = user.referral.referred_by
+
+                        referral.credits_gained = settings.REFERRALS_PER_TXN
+
+                        referred_by.referred_to.add(user.referral)
+                        referred_by.credits_gained = referred_by.credits_gained + 1
+                        referred_by.save()
+                        referral.save()
+
+                    return Response(
+                        {'token': token.key, 'id': user.id},
+                        status.HTTP_200_OK)
 
                 else:
                     log_error(
@@ -123,12 +139,17 @@ class Activation(APIView):
             # activation key expired
             else:
                 return Response(
-                    {'activation_key': activation_key, 'detail': constants.ACTIVATION_KEY_EXPIRED},
+                    {
+                        'activation_key': activation_key,
+                        'detail': constants.ACTIVATION_KEY_EXPIRED
+                    },
                     status.HTTP_400_BAD_REQUEST
                 )
         # invalid key
         except UserenaSignup.DoesNotExist:
-            return Response({'detail': constants.ACTIVATION_KEY_INVALID}, status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': constants.ACTIVATION_KEY_INVALID},
+                status.HTTP_400_BAD_REQUEST)
 
 
 class ActivationRetry(APIView):
@@ -140,7 +161,8 @@ class ActivationRetry(APIView):
         try:
             if UserenaSignup.objects.check_expired_activation(activation_key):
 
-                user = UserenaSignup.objects.get(activation_key=activation_key).user
+                user = UserenaSignup.objects.get(
+                    activation_key=activation_key).user
 
                 new_activation_key = reissue_activation(activation_key)
 
@@ -148,7 +170,8 @@ class ActivationRetry(APIView):
 
                     send_activation_email(user, new_activation_key)
 
-                    return Response({'email': user.email}, status=status.HTTP_201_CREATED)
+                    return Response(
+                        {'email': user.email}, status=status.HTTP_201_CREATED)
 
                 else:
                     log_error(
@@ -158,10 +181,13 @@ class ActivationRetry(APIView):
                     return Response(status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 return Response(
-                    {'detail': constants.ACTIVATION_KEY_NOT_EXPIRED}, status.HTTP_400_BAD_REQUEST
+                    {'detail': constants.ACTIVATION_KEY_NOT_EXPIRED},
+                    status.HTTP_400_BAD_REQUEST
                 )
         except UserenaSignup.DoesNotExist:
-            return Response({'detail': constants.ACTIVATION_KEY_INVALID}, status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': constants.ACTIVATION_KEY_INVALID},
+                status.HTTP_400_BAD_REQUEST)
 
 
 class ActivationResend(APIView):
@@ -177,19 +203,22 @@ class ActivationResend(APIView):
             if serializer.is_valid():
 
                 try:
-                    user = User.objects.get(email__iexact=serializer.validated_data['email'])
+                    user = User.objects.get(
+                        email__iexact=serializer.validated_data['email'])
 
                 except User.DoesNotExist:
                     raise AccountException(constants.EMAIL_UNKNOWN)
 
                 if user.is_active:
-                    raise AccountException(constants.USER_ACCOUNT_ALREADY_ACTIVATED)
+                    raise AccountException(
+                        constants.USER_ACCOUNT_ALREADY_ACTIVATED)
 
                 # handle deactivated account
                 if user.profile.account_deactivated:
                     raise AccountException(constants.USER_ACCOUNT_DISABLED)
 
-                new_activation_key = reissue_activation(user.userena_signup.activation_key)
+                new_activation_key = reissue_activation(
+                    user.userena_signup.activation_key)
 
                 if new_activation_key:
                     send_activation_email(user, new_activation_key)
@@ -200,11 +229,13 @@ class ActivationResend(APIView):
                               .format(serializer.instance.email))
                     return Response(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except AccountException as e:
 
-            return Response({'detail': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Signin(APIView):
