@@ -81,12 +81,12 @@ class Referral(models.Model):
         return self.credits_gained - self.credits_redeemed
 
     @property
-    def no_free_transcations(self):
+    def free_transaction_no(self):
         return int(self.unused_credits / settings.REFERRALS_PER_TXN)
 
     @property
     def free_transaction(self):
-        return self.no_free_transcations > 0
+        return self.free_transaction_no > 0
 
     def __unicode__(self):
         try:
@@ -95,7 +95,7 @@ class Referral(models.Model):
             return '{}'.format(self.code)
 
     def redeem_transaction(self):
-        if self.no_free_transcations < 1:
+        if self.free_transaction_no < 1:
             raise ReferralException(constants.REFERRAL_ERROR)
 
         if self.credits_gained < settings.REFERRALS_PER_TXN:

@@ -12,6 +12,6 @@ class ReferralSerializer(serializers.ModelSerializer):
         model = models.Referral
         fields = (
             'code', 'credits_gained', 'credits_redeemed',
-            'unused_credits', 'no_free_transcations',
+            'unused_credits', 'free_transaction_no',
             'referred_to', 'referred_by'
         )

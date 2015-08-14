@@ -15,11 +15,11 @@ class ReferralFeeAdmin(admin.ModelAdmin):
     user_email.allow_tags = True
     user_email.short_description = 'user'
 
-    def no_free_transcations(self, obj):
-        return obj.no_free_transcations
+    def free_transaction_no(self, obj):
+        return obj.free_transaction_no
 
-    no_free_transcations.allow_tags = True
-    no_free_transcations.short_description = 'no of free transcations'
+    free_transaction_no.allow_tags = True
+    free_transaction_no.short_description = 'no of free transcations'
 
     def user_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
@@ -33,11 +33,11 @@ class ReferralFeeAdmin(admin.ModelAdmin):
     list_display = ('id', 'user_email', 'code',
                     'credits_gained', 'credits_redeemed')
 
-    readonly_fields = ('id', 'user_url', 'no_free_transcations',
+    readonly_fields = ('id', 'user_url', 'free_transaction_no',
                        'referred_by', 'referred_to')
 
     fields = ('id', 'user_url', 'code', 'credits_gained',
               'credits_redeemed', 'referred_by', 'referred_to',
-              'no_free_transcations')
+              'free_transaction_no')
 
 admin.site.register(Referral, ReferralFeeAdmin)
