@@ -54,7 +54,8 @@ class SignupSerializer(PasswordSerializer):
     Also requires the password to be entered twice.
     '''
     email = fields.EmailField(label='Email')
-    accepted_privacy_policy = fields.BooleanField(label='Privacy Policy accepted')
+    accepted_privacy_policy = fields.BooleanField(
+        label='Privacy Policy accepted')
 
     def validate_email(self, value):
         'Validate that the e-mail address is unique.'
@@ -62,18 +63,22 @@ class SignupSerializer(PasswordSerializer):
         if User.objects.filter(email__iexact=value):
             if UserenaSignup.objects.filter(user__email__iexact=value)\
                .exclude(activation_key=userena_settings.USERENA_ACTIVATED):
-                raise serializers.ValidationError(constants.EMAIL_IN_USE_UNCONFIRMED)
+                raise serializers.ValidationError(
+                    constants.EMAIL_IN_USE_UNCONFIRMED)
             raise serializers.ValidationError(constants.EMAIL_IN_USE)
         return value
 
     def validate_accepted_privacy_policy(self, value):
         if not value:
-            raise serializers.ValidationError(constants.PRIVACY_POLICY_NOT_ACCEPTED)
+            raise serializers.ValidationError(
+                constants.PRIVACY_POLICY_NOT_ACCEPTED)
         return value
 
     def create(self, validated_data):
 
-        ''' Generate a random username before falling back to parent signup form '''
+        '''
+        Generate a random username before falling back to parent signup form
+        '''
         while True:
             username = sha_constructor(str(random.random())).hexdigest()[:5]
             try:
@@ -117,16 +122,31 @@ class AuthTokenSerializer(serializers.Serializer):
                 raise serializers.ValidationError(constants.ADMIN_ACCOUNT)
 
             if user.profile.account_deactivated:
-                raise serializers.ValidationError(constants.USER_ACCOUNT_DISABLED)
+                raise serializers.ValidationError(
+                    constants.USER_ACCOUNT_DISABLED)
 
             if not user.is_active:
-                raise serializers.ValidationError(constants.USER_ACCOUNT_NOT_ACTIVATED_YET)
+                raise serializers.ValidationError(
+                    constants.USER_ACCOUNT_NOT_ACTIVATED_YET)
 
             data['user'] = user
             return data
 
         else:
-            raise serializers.ValidationError(constants.SIGNIN_WRONG_CREDENTIALS)
+            try:
+                fb_user = User.objects.get(email=email)
+
+                if fb_user.profile.facebook_link and not fb_user.has_usable_password():
+                    raise serializers.ValidationError(
+                        constants.EMAIL_SIGNIN_FACEBOOK_USER_PRESENT)
+
+            except User.DoesNotExist:
+                pass
+            except serializers.ValidationError, err:
+                raise err
+
+            raise serializers.ValidationError(
+                constants.SIGNIN_WRONG_CREDENTIALS)
 
 
 class SetPasswordSerializer(PasswordSerializer):
