@@ -79,8 +79,8 @@ def save_profile(backend, user, response, *args, **kwargs):
 
     # populate profile with Facebook data
     if backend.name == settings.SOCIAL_AUTH_FACEBOOK:
-        new_profile.gender = response.get('gender')
-        new_profile.facebook_link = response.get('link')
+        new_profile.gender = response.get('gender', '')
+        new_profile.facebook_link = response.get('link', '')
         new_profile.save()
 
     try:
