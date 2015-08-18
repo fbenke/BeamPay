@@ -37,6 +37,11 @@ class AbstractTransaction(models.Model):
         (c.INVALID, 'invalid')
     )
 
+    YES_NO = (
+        (True, 'Yes'),
+        (False, 'No')
+    )
+
     sender = models.ForeignKey(
         User,
         related_name='%(app_label)s_%(class)s',
@@ -116,8 +121,9 @@ class AbstractTransaction(models.Model):
     )
 
     free_from_referral = models.BooleanField(
-        'Is free from referrals',
+        'Is free from referral',
         default=False,
+        choices=YES_NO,
         help_text='Whether the transaction was free based on referral'
     )
 

@@ -18,7 +18,8 @@ class CommentInline(GenericTabularInline):
     formset = CommentInlineFormset
 
     def get_formset(self, request, obj=None, **kwargs):
-        formset = super(CommentInline, self).get_formset(request, obj, **kwargs)
+        formset = super(CommentInline, self).get_formset(
+            request, obj, **kwargs)
         formset.request = request
         return formset
 
@@ -31,7 +32,8 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     def sender_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
         return '<a href="{}/{}/">{} {}</a>'.format(
-            path, obj.sender.profile.id, obj.sender.first_name, obj.sender.last_name)
+            path, obj.sender.profile.id, obj.sender.first_name,
+            obj.sender.last_name)
 
     sender_url.allow_tags = True
     sender_url.short_description = 'sender'
@@ -80,7 +82,8 @@ class GenericTransactionAdmin(admin.ModelAdmin):
     def referral_url(self, obj):
         path = settings.API_BASE_URL + 'admin/referral/referral'
         return '<a href="{}/{}/">{}</a>'.format(
-            path, obj.sender.referral.id, obj.sender.referral.no_free_transcations)
+            path, obj.sender.referral.id,
+            obj.sender.referral.no_free_transcations)
 
     referral_url.allow_tags = True
     referral_url.short_description = 'free transactions'
@@ -96,7 +99,7 @@ class GenericTransactionAdmin(admin.ModelAdmin):
         'id', 'sender_email', 'recipient_name', 'reference_number', 'state'
     )
 
-    list_filter = ('state',)
+    list_filter = ('state', 'free_from_referral')
 
     search_fields = ('id', 'reference_number')
 
@@ -152,13 +155,15 @@ class InstantPaymentAdmin(GenericTransactionAdmin):
     def __init__(self, model, admin_site):
         super(InstantPaymentAdmin, self).__init__(model, admin_site)
         addtl_readonly_fields = ('service_fee_url', 'service_charge',
-                                 'amount_usd', 'amount_ghs', 'payment_processor',
-                                 'payment_reference')
+                                 'amount_usd', 'amount_ghs',
+                                 'payment_processor', 'payment_reference',
+                                 'free_from_referral')
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
 
         pricing_fieldset = ('Pricing', {
-            'fields': ('exchange_rate_url', 'service_fee_url', 'amount_ghs',
-                       'amount_usd', 'service_charge', 'total_charge_usd')
+            'fields': ('free_from_referral', 'exchange_rate_url',
+                       'service_fee_url', 'amount_ghs', 'amount_usd',
+                       'service_charge', 'total_charge_usd')
         })
 
         self.fieldsets = (self.fieldsets[0], pricing_fieldset,
@@ -207,8 +212,16 @@ class ValetAdmin(GenericTransactionAdmin):
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
         addtl_fieldset = ('description', )
         addtl_fieldset = ('Valet', {'fields': addtl_fieldset})
+        pricing_fieldset = (
+            'Pricing', {
+                'fields': (
+                    'free_from_referral', 'exchange_rate_url', 'amount_ghs',
+                    'amount_usd', 'service_charge', 'total_charge_usd',
+                    'referral_url')
+            }
+        )
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2],
+                          pricing_fieldset, self.fieldsets[2],
                           self.fieldsets[3])
 
 
@@ -220,8 +233,16 @@ class SchoolFeeAdmin(GenericTransactionAdmin):
         self.readonly_fields = self.readonly_fields + addtl_readonly_fields
         addtl_fieldset = ('ward_name', 'school', 'additional_info')
         addtl_fieldset = ('School Fees', {'fields': addtl_fieldset})
+        pricing_fieldset = (
+            'Pricing', {
+                'fields': (
+                    'free_from_referral', 'exchange_rate_url', 'amount_ghs',
+                    'amount_usd', 'service_charge', 'total_charge_usd',
+                    'referral_url')
+            }
+        )
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2],
+                          pricing_fieldset, self.fieldsets[2],
                           self.fieldsets[3])
 
 
@@ -234,8 +255,16 @@ class GiftAdmin(GenericTransactionAdmin):
         addtl_fieldset = ('gift_type', 'delivery_address',
                           'delivery_time', 'additional_info')
         addtl_fieldset = ('Gift', {'fields': addtl_fieldset})
+        pricing_fieldset = (
+            'Pricing', {
+                'fields': (
+                    'free_from_referral', 'exchange_rate_url', 'amount_ghs',
+                    'amount_usd', 'service_charge', 'total_charge_usd',
+                    'referral_url')
+            }
+        )
         self.fieldsets = (self.fieldsets[0], addtl_fieldset,
-                          self.fieldsets[1], self.fieldsets[2],
+                          pricing_fieldset, self.fieldsets[2],
                           self.fieldsets[3])
 
 admin.site.register(models.AirtimeTopup, AirtimeTopupAdmin)
