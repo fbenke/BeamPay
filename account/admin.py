@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 from userena.admin import UserenaAdmin
 
@@ -22,6 +23,13 @@ class BeamProfileAdmin(admin.ModelAdmin):
     user_url.allow_tags = True
     user_url.short_description = 'user'
 
+    def referral_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/referral/referral'
+        return '<a href="{}/{}/">{}</a>'.format(
+            path, obj.user.referral.id, obj.user.referral.id)
+    referral_url.allow_tags = True
+    referral_url.short_description = 'Referral Link'
+
     def user_email(self, obj):
         return obj.user.email
 
@@ -35,7 +43,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
         'user_url', 'user_email', 'name', 'street', 'city', 'post_code',
         'country', 'accepted_privacy_policy', 'date_of_birth', 'phone_number',
         'preferred_contact_method', 'preferred_contact_details', 'gender',
-        'facebook_link'
+        'facebook_link', 'referral_url'
     )
 
     fieldsets = (
@@ -44,12 +52,15 @@ class BeamProfileAdmin(admin.ModelAdmin):
         }),
         ('Profile', {
             'fields': ('street', 'city', 'post_code', 'country',
-                       'date_of_birth', 'phone_number', 'preferred_contact_method',
+                       'date_of_birth', 'phone_number',
+                       'preferred_contact_method',
                        'preferred_contact_details')
         }),
         ('Misc', {
             'classes': ('collapse',),
-            'fields': ('gender', 'facebook_link', 'accepted_privacy_policy')
+            'fields': (
+                'gender', 'facebook_link',
+                'accepted_privacy_policy', 'referral_url')
         })
     )
 
@@ -65,7 +76,15 @@ class CustomUserenaAdmin(UserenaAdmin):
 
     def profile_url(self, obj):
         path = settings.API_BASE_URL + 'admin/account/beamprofile'
-        return '<a href="{}/{}/">{}</a>'.format(path, obj.profile.id, obj.profile.id)
+        return '<a href="{}/{}/">{}</a>'.format(
+            path, obj.profile.id, obj.profile.id)
+
+    def referral_url(self, obj):
+        path = settings.API_BASE_URL + 'admin/referral/referral'
+        return '<a href="{}/{}/">{}</a>'.format(
+            path, obj.referral.id, obj.referral.id)
+    referral_url.allow_tags = True
+    referral_url.short_description = 'Referral Link'
 
     def beam_trust_status(self, obj):
         return obj.profile.get_trust_status_display()
@@ -73,9 +92,22 @@ class CustomUserenaAdmin(UserenaAdmin):
     profile_url.allow_tags = True
     profile_url.short_description = 'profile'
 
-    list_display = ('id', 'email', 'profile_url', 'is_staff', 'is_active', 'beam_trust_status', 'date_joined')
+    readonly_fields = ('referral_url',)
+
+    fieldsets = (
+        (None, {'fields': ('username', 'password', 'referral_url')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
+                                       'groups', 'user_permissions')}),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+    )
+
+    list_display = (
+        'id', 'email', 'profile_url', 'is_staff', 'is_active',
+        'beam_trust_status', 'date_joined')
     list_display_links = ('id', 'email')
-    list_filter = ('is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
+    list_filter = (
+        'is_staff', 'is_superuser', 'is_active', 'profile__trust_status')
     list_per_page = 20
     ordering = ('-id',)
 
