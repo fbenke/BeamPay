@@ -55,6 +55,7 @@ class StripeCharge(GenericAPIView):
 
             if referral.free_transaction:
                 transaction.service_charge = 0
+                transaction.free_from_referral = True
                 referral.redeem_transaction()
 
             amount_usd = int(transaction.total_charge_usd * 100)
