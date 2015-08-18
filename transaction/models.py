@@ -115,6 +115,12 @@ class AbstractTransaction(models.Model):
         help_text='Last changed'
     )
 
+    free_from_referral = models.BooleanField(
+        'Is free from referrals',
+        default=False,
+        help_text='Whether the transaction was free based on referral'
+    )
+
     remarks = models.TextField(
         'Remarks',
         blank=True,
