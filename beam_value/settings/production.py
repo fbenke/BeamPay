@@ -306,7 +306,7 @@ MAIL_PASSWORD_RESET_URL = '#!/auth/forgot/{}-{}/'
 
 # ==================== Referral Programs ====================
 
-REFERRALS_PER_TXN = 5
+REFERRALS_PER_TXN = 4
 
 
 # ==================== IP-based blocking ====================
