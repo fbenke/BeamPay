@@ -22,7 +22,7 @@ from transaction import constants
 from pricing import constants as p
 from transaction import models
 from referral.models import create_referral_code
-from account.serializers import ProfileSerializer
+from account.serializers import UserSerializer
 from referral.serializers import ReferralSerializer
 from pricing.serializers import ExchangeRateSerializer, ServiceFeeSerializer
 
@@ -277,7 +277,7 @@ class InstaPaySetupView(RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
 
-        profile = self.request.user.profile
+        user = self.request.user
         referral = None
         exchange_rate = {}
         airtime_service_fee = None
@@ -305,7 +305,7 @@ class InstaPaySetupView(RetrieveAPIView):
             bill_service_fee = None
 
         insta_pay = {}
-        insta_pay['profile'] = ProfileSerializer(profile).data
+        insta_pay['user'] = UserSerializer(user).data
 
         if exchange_rate:
             insta_pay['pricing'] = ExchangeRateSerializer(
