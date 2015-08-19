@@ -21,6 +21,11 @@ from transaction import serializers
 from transaction import constants
 from pricing import constants as p
 from transaction import models
+from referral.models import create_referral_code
+from account.serializers import ProfileSerializer
+from referral.serializers import ReferralSerializer
+from pricing.serializers import ExchangeRateSerializer, ServiceFeeSerializer
+
 
 mod = __import__('transaction.models', fromlist=constants.TRANSACTION_MODELS)
 
@@ -264,3 +269,53 @@ class GetTransaction(RetrieveAPIView):
                 {'detail': constants.INVALID_PARAMETERS},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class InstaPaySetupView(RetrieveAPIView):
+
+    permission_classes = (IsAuthenticated, IsNoAdmin)
+
+    def get(self, request, *args, **kwargs):
+
+        profile = self.request.user.profile
+        referral = None
+        exchange_rate = {}
+        airtime_service_fee = None
+        bill_service_fee = None
+
+        try:
+            referral = self.request.user.referral
+        except ObjectDoesNotExist:
+            referral = create_referral_code(self.request.user)
+
+        try:
+            exchange_rate = get_current_exchange_rate()
+            service_fees = get_current_service_fees()
+
+            if service_fees[0].service == p.AIRTIME:
+                airtime_service_fee = service_fees[0]
+                bill_service_fee = service_fees[1]
+            else:
+                airtime_service_fee = service_fees[1]
+                bill_service_fee = service_fees[0]
+
+        except Exception:
+            exchange_rate = {}
+            airtime_service_fee = None
+            bill_service_fee = None
+
+        insta_pay = {}
+        insta_pay['profile'] = ProfileSerializer(profile).data
+
+        if exchange_rate:
+            insta_pay['pricing'] = ExchangeRateSerializer(
+                exchange_rate).data
+            insta_pay['pricing']['exchange_rate_id'] = insta_pay['pricing']['id']
+            insta_pay['pricing']['airtime'] = ServiceFeeSerializer(
+                airtime_service_fee).data
+            insta_pay['pricing']['bill'] = ServiceFeeSerializer(
+                bill_service_fee).data
+
+        insta_pay['referral'] = ReferralSerializer(referral).data
+
+        return Response(insta_pay)

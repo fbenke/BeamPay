@@ -33,6 +33,11 @@ urlpatterns = patterns(
         name='add_valet'
     ),
     url(
+        r'^setup/$',
+        views.InstaPaySetupView.as_view(),
+        name='setup'
+    ),
+    url(
         r'^$',
         views.ViewTransactions.as_view(),
         name='list'
