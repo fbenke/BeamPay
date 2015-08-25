@@ -64,7 +64,7 @@ class BeamProfileAdmin(admin.ModelAdmin):
         })
     )
 
-    search_fields = ('user_id', 'user_email')
+    search_fields = ('user__id', 'user__email')
 
     list_display = ('user_id', 'user_email', 'country', 'trust_status')
     list_per_page = 20
@@ -128,6 +128,8 @@ class CustomTokenAdmin(TokenAdmin):
 
     list_display = ('user_email', 'key', 'created')
     list_per_page = 20
+
+    search_fields = ('user__email',)
 
     readonly_fields = ('user_id', 'user_email', 'key')
     fields = readonly_fields
