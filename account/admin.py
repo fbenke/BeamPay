@@ -82,7 +82,7 @@ class CustomUserenaAdmin(UserenaAdmin):
     def referral_url(self, obj):
         path = settings.API_BASE_URL + 'admin/referral/referral'
         return '<a href="{}/{}/">{}</a>'.format(
-            path, obj.referral.id, obj.referral.id)
+            path, obj.referral.id, obj.referral.code)
     referral_url.allow_tags = True
     referral_url.short_description = 'Referral Link'
 
