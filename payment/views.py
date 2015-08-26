@@ -74,7 +74,9 @@ class StripeCharge(GenericAPIView):
             transaction.save()
             transaction.add_status_change(t.PAID)
             transaction.post_paid()
-            referral.redeem_transaction()
+
+            if referral.free_transaction:
+                referral.redeem_transaction()
 
             return Response(status=status.HTTP_201_CREATED)
 
