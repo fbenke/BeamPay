@@ -38,7 +38,7 @@ def end_previous_object(cls, obj):
         previous_object.end = timezone.now()
         previous_object.save()
     except ObjectDoesNotExist:
-        if cls.objects.filter(service=obj.service).exists():
+        if cls != ExchangeRate and cls.objects.filter(service=obj.service).exists():
             msg = 'ERROR {} - Failed to end previous pricing.'.format(cls)
             log_error(msg)
             raise ObjectDoesNotExist(msg)
