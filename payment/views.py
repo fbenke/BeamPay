@@ -61,11 +61,19 @@ class StripeCharge(GenericAPIView):
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
 
+            description = 'GHS {} of {} to {} (Ref. No.: {})'.format(
+                transaction.amount_ghs,
+                (t.BILL_2_DESC[transaction.bill_type] if txn_type == t.BILL else 'Airtime'),
+                str(transaction.recipient),
+                transaction.reference_number
+            )
+
             charge = Charge.create(
                 amount=amount_usd,
                 currency='USD',
                 source=token,
-                description=transaction.reference_number
+                description=description,
+                receipt_email=request.user.email
             )
 
             transaction.payment_reference = charge.id
