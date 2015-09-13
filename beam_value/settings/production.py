@@ -332,3 +332,5 @@ GEOIP_PATH = BASE_DIR('static', 'geo_data', 'GeoIP.dat')
 
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_SETTING_CAPTURE = bool(
+    int(os.environ.get('STRIPE_SETTING_CAPTURE', '1')))

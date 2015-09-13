@@ -68,12 +68,17 @@ class StripeCharge(GenericAPIView):
                 transaction.reference_number
             )
 
+            statement_descriptor = 'Beam Bill Ref. {}'.format(
+                transaction.reference_number)
+
             charge = Charge.create(
                 amount=amount_usd,
                 currency='USD',
                 source=token,
                 description=description,
-                receipt_email=request.user.email
+                receipt_email=request.user.email,
+                statement_descriptor=statement_descriptor,
+                capture=settings.STRIPE_SETTING_CAPTURE
             )
 
             transaction.payment_reference = charge.id
