@@ -60,6 +60,10 @@ urlpatterns = patterns(
     url(
         r'^api/v1/referral/',
         include('referral.urls', namespace='referral')
+    ),
+    url(
+        r'^api/v1/valet/',
+        include('valet.urls', namespace='valet')
     )
 )
 

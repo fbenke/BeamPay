@@ -78,24 +78,29 @@ MIDDLEWARE_CLASSES = (
 # Site types in Env
 SITE_API = 0
 SITE_USER = 1
+SITE_VALET = 2
 
 # ENV to URL mapping
 ENV_SITE_MAPPING = {
     ENV_LOCAL: {
         SITE_API: os.environ.get('LOCAL_SITE_API'),
         SITE_USER: os.environ.get('LOCAL_SITE_USER'),
+        SITE_VALET: os.environ.get('LOCAL_SITE_VALET'),
     },
     ENV_DEV: {
         SITE_API: 'api-dev.beampay.co',
         SITE_USER: 'dev.beampay.co',
+        SITE_VALET: 'valet-dev.beampay.co',
     },
     ENV_VIP: {
         SITE_API: 'api-vip.beampay.co',
         SITE_USER: 'vip.beampay.co',
+        SITE_VALET: 'valet-vip.beampay.co',
     },
     ENV_PROD: {
         SITE_API: 'api.beampay.co',
         SITE_USER: 'beampay.co',
+        SITE_VALET: 'valet.beampay.co',
     }
 }
 
@@ -151,9 +156,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Django CORS headers
 if ENV == ENV_PROD:
     CORS_ORIGIN_WHITELIST = (ENV_SITE_MAPPING[ENV][SITE_USER],
-                             'www.{}'.format(ENV_SITE_MAPPING[ENV][SITE_USER]))
+                             'www.{}'.format(ENV_SITE_MAPPING[ENV][SITE_USER]),
+                             ENV_SITE_MAPPING[ENV][SITE_VALET])
 else:
-    CORS_ORIGIN_WHITELIST = (ENV_SITE_MAPPING[ENV][SITE_USER],)
+    CORS_ORIGIN_WHITELIST = (ENV_SITE_MAPPING[ENV][SITE_USER],
+                             ENV_SITE_MAPPING[ENV][SITE_VALET])
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -296,6 +303,8 @@ MAIL_CHANGE_EMAIL_NEW_HTML = 'userena/emails/confirmation_email_message_new.html
 
 MAIL_NOTIFY_ADMIN_PAID_SUBJECT = 'emails/transaction_paid_subject.txt'
 MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/transaction_paid_message.txt'
+MAIL_NOTIFY_ADMIN_VALET_SUBJECT = 'emails/valet_wapnumber_subject.txt'
+MAIL_NOTIFY_ADMIN_VALET_TEXT = 'emails/valet_wapnumber_message.txt'
 MAIL_NOTIFY_ADMIN_REQUEST_SUBJECT = 'emails/transaction_request_subject.txt'
 MAIL_NOTIFY_ADMIN_REQUEST_TEXT = 'emails/transaction_request_message.txt'
 

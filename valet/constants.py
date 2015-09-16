@@ -1,0 +1,1 @@
+INVALID_NUMBER = '0'

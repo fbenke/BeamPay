@@ -1,0 +1,7 @@
+Dear Admin,
+
+The number {{number}} has request a valet service. Please reply on WhatsApp ASAP.
+
+Sincerely,
+
+The SendGridBot
