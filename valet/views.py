@@ -17,6 +17,7 @@ def add_whatsapp_number(request):
             email_template_name=settings.MAIL_NOTIFY_ADMIN_VALET_TEXT,
             context={
                 'number': number,
+                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API]
             },
             to_email=mails.get_admin_mail_addresses()
         )
