@@ -1,3 +1,9 @@
+import xml.etree.ElementTree as ET
+import requests
+import unicodedata
+# from operator import itemgetter
+# from time import strptime
+
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework import status
@@ -22,10 +28,23 @@ def add_whatsapp_number(request):
             to_email=mails.get_admin_mail_addresses()
         )
 
+        r = requests.get('https://medium.com/feed/beam-blog')
+        xml_data = ET.fromstring(
+            unicodedata.normalize('NFKD', r.text).encode('ascii', 'ignore'))
+
         return Response(
-            {'success': 'message sent'}, status=status.HTTP_200_OK)
+            get_blogs_from_xml(xml_data), status=status.HTTP_200_OK)
 
     else:
         return Response(
             {'detail': constants.INVALID_NUMBER},
             status=status.HTTP_400_BAD_REQUEST)
+
+
+def get_blogs_from_xml(xml_data):
+    blogs = []
+
+    for x in xrange(8, 11):
+        blogs.append(xml_data[0][x][1].text)
+
+    return blogs
