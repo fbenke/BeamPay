@@ -16,6 +16,8 @@ from valet import constants
 @api_view(['GET', 'POST'])
 def add_whatsapp_number(request):
     number = request.data.get('number')
+    email = request.data.get('email')
+
     if number and len(number) >= 10 and len(number) <= 13:
 
         mails.send_mail(
@@ -23,7 +25,8 @@ def add_whatsapp_number(request):
             email_template_name=settings.MAIL_NOTIFY_ADMIN_VALET_TEXT,
             context={
                 'number': number,
-                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API]
+                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
+                'email': email
             },
             to_email=mails.get_admin_mail_addresses()
         )
