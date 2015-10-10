@@ -1,3 +1,10 @@
 from django.contrib import admin
 
-# Register your models here.
+from valet.models import WhatsappRequest
+
+
+class WhatsappRequestAdmin(admin.ModelAdmin):
+    readonly_fields = ['wap_number']
+
+
+admin.site.register(WhatsappRequest, WhatsappRequestAdmin)
