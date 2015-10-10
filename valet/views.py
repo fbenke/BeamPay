@@ -1,6 +1,6 @@
-import xml.etree.ElementTree as ET
-import requests
-import unicodedata
+# import xml.etree.ElementTree as ET
+# import requests
+# import unicodedata
 # from operator import itemgetter
 # from time import strptime
 
@@ -11,32 +11,39 @@ from rest_framework.decorators import api_view
 
 from beam_value.utils import mails
 from valet import constants
+from valet.models import WhatsappRequest
 
 
 @api_view(['GET', 'POST'])
 def add_whatsapp_number(request):
     number = request.data.get('number')
-    email = request.data.get('email')
+    # email = request.data.get('email')
 
     if number and len(number) >= 10 and len(number) <= 13:
+        wap_request, created = WhatsappRequest.objects.get_or_create(
+            wap_number=number)
 
         mails.send_mail(
             subject_template_name=settings.MAIL_NOTIFY_ADMIN_VALET_SUBJECT,
             email_template_name=settings.MAIL_NOTIFY_ADMIN_VALET_TEXT,
             context={
                 'number': number,
-                'domain': settings.ENV_SITE_MAPPING[settings.ENV][settings.SITE_API],
-                'email': email
+                'domain': settings.ENV_SITE_MAPPING[settings.ENV][
+                    settings.SITE_API],
+                'wap_request_id': wap_request.id,
+                'protocol': settings.PROTOCOL,
+                'created': created
             },
             to_email=mails.get_admin_mail_addresses()
         )
 
-        r = requests.get('https://medium.com/feed/beam-blog')
-        xml_data = ET.fromstring(
-            unicodedata.normalize('NFKD', r.text).encode('ascii', 'ignore'))
+        # r = requests.get('https://medium.com/feed/beam-blog')
+        # xml_data = ET.fromstring(
+        #     unicodedata.normalize('NFKD', r.text).encode('ascii', 'ignore'))
 
         return Response(
-            get_blogs_from_xml(xml_data), status=status.HTTP_200_OK)
+            {'success': 'The number has been found successfully'},
+            status=status.HTTP_200_OK)
 
     else:
         return Response(

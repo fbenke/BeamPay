@@ -1,6 +1,6 @@
 Dear Admin,
 
-The number {{number}} {% if email %}with email:{{email}}{% endif %} has requested a valet service from {{domain}}. Please reply on WhatsApp ASAP.
+The number {{number}} has requested a valet service {% if not created %}again {% endif %}from {{protocol}}://{{domain}}/admin/valet/whatsapprequest/{{wap_request_id}}. Please reply on WhatsApp ASAP.
 
 Sincerely,
 
