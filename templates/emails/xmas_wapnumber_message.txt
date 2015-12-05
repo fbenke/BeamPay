@@ -1,0 +1,7 @@
+Dear Admin,
+
+The number {{number}} has requested an Xmas Care Package from {{protocol}}://{{domain}}/admin/valet/whatsapprequest/{{wap_request_id}}. Please reply on WhatsApp ASAP.
+
+Sincerely,
+
+The SendGridBot

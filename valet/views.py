@@ -17,6 +17,7 @@ from valet.models import WhatsappRequest
 @api_view(['GET', 'POST'])
 def add_whatsapp_number(request):
     number = request.data.get('number')
+    xmas = request.data.get('xmas', None)
     # email = request.data.get('email')
 
     if number and len(number) >= 10 and len(number) <= 13:
@@ -24,8 +25,14 @@ def add_whatsapp_number(request):
             wap_number=number)
 
         mails.send_mail(
-            subject_template_name=settings.MAIL_NOTIFY_ADMIN_VALET_SUBJECT,
-            email_template_name=settings.MAIL_NOTIFY_ADMIN_VALET_TEXT,
+            subject_template_name=(
+                settings.MAIL_NOTIFY_ADMIN_XMAS_SUBJECT if xmas else (
+                    settings.MAIL_NOTIFY_ADMIN_VALET_SUBJECT)
+            ),
+            email_template_name=(
+                settings.MAIL_NOTIFY_ADMIN_XMAS_TEXT if xmas else (
+                    settings.MAIL_NOTIFY_ADMIN_VALET_TEXT)
+            ),
             context={
                 'number': number,
                 'domain': settings.ENV_SITE_MAPPING[settings.ENV][

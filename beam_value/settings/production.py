@@ -306,6 +306,8 @@ MAIL_NOTIFY_ADMIN_PAID_SUBJECT = 'emails/transaction_paid_subject.txt'
 MAIL_NOTIFY_ADMIN_PAID_TEXT = 'emails/transaction_paid_message.txt'
 MAIL_NOTIFY_ADMIN_VALET_SUBJECT = 'emails/valet_wapnumber_subject.txt'
 MAIL_NOTIFY_ADMIN_VALET_TEXT = 'emails/valet_wapnumber_message.txt'
+MAIL_NOTIFY_ADMIN_XMAS_SUBJECT = 'emails/xmas_wapnumber_subject.txt'
+MAIL_NOTIFY_ADMIN_XMAS_TEXT = 'emails/xmas_wapnumber_message.txt'
 MAIL_NOTIFY_ADMIN_REQUEST_SUBJECT = 'emails/transaction_request_subject.txt'
 MAIL_NOTIFY_ADMIN_REQUEST_TEXT = 'emails/transaction_request_message.txt'
 
